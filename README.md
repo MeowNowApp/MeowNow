@@ -9,7 +9,7 @@ This is a personal project for hosting a website that displays a random picture 
 ## File Overview
 
 ```
-website/
+RandomCat/
 ├── index.html       # The main webpage
 ├── style.css        # Basic styling for the page
 ├── script.js        # Handles fetching and displaying random images
