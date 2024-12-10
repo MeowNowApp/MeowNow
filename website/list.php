@@ -5,6 +5,8 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Dotenv\Dotenv;
 
+header('Content-Type: application/json');
+
 // Load environment variables
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -28,12 +30,14 @@ try {
     $files = [];
     if (isset($objects['Contents'])) {
         foreach ($objects['Contents'] as $object) {
-            $files[] = $s3->getObjectUrl($bucket, $object['Key']);
+            // Extract just the filename from the full path
+            $files[] = basename($object['Key']);
         }
     }
 
     echo json_encode($files);
 } catch (AwsException $e) {
-    echo "Error fetching files: " . $e->getMessage();
+    http_response_code(500);
+    echo json_encode(['error' => "Error fetching files: " . $e->getMessage()]);
 }
 ?>
