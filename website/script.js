@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Log the raw response text first
       const rawResponse = await response.text();
-      console.log("Raw PHP Response:", rawResponse);
 
       // Try parsing the response
       try {
@@ -20,10 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const randomCat = cats[Math.floor(Math.random() * cats.length)];
         const imageUrl = `https://randomcat.s3.amazonaws.com/${randomCat}`;
-        
-        console.log("Parsed cats array:", cats);
-        console.log("Selected random cat:", randomCat);
-        console.log("Setting catImage.src to:", imageUrl);
         
         catImage.src = imageUrl;
       } catch (parseError) {
