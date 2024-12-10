@@ -19,11 +19,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Set the working directory
 WORKDIR /var/www/html
 
-# Copy vendor files
-COPY vendor/ /var/www/html/vendor
-
-# Copy application files
-COPY website/ /var/www/html/
+# Copy files
+COPY . /var/www/html/
 
 # Copy Composer files
 COPY composer.json composer.lock ./
