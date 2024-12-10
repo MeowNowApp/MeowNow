@@ -1,3 +1,4 @@
-cats/*
-.htaccess
 .DS_Store
+website/.env
+vendor/
+composer.lock
