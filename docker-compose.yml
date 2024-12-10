@@ -1,0 +1,10 @@
+services:
+  randomcat:
+    build: .
+    container_name: randomcat
+    ports:
+      - "8080:80"
+    volumes:
+      - ./website:/var/www/html
+    env_file:
+      - website/.env
