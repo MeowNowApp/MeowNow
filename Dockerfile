@@ -1,6 +1,12 @@
 # Base PHP with Apache image
 FROM php:apache
 
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install required PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
@@ -8,7 +14,7 @@ RUN docker-php-ext-install pdo pdo_mysql
 RUN a2enmod rewrite
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Set the working directory
 WORKDIR /var/www/html
