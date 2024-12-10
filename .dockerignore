@@ -1,7 +1,0 @@
-# Ignore Dockerfile and docker-compose.yml
-Dockerfile
-docker-compose.yml
-
-# Ignore any other unnecessary files (e.g., git files, node_modules, etc.)
-.git
-*.md

@@ -12,10 +12,12 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $bucket = $_ENV['AWS_BUCKET_NAME'];
+$region = $_ENV['AWS_REGION'];
+$s3BaseUrl = "https://$bucket.s3.$region.amazonaws.com/";
 
 try {
     $s3 = new S3Client([
-        'region' => $_ENV['AWS_REGION'],
+        'region' => $region,
         'version' => 'latest',
         'credentials' => [
             'key' => $_ENV['AWS_ACCESS_KEY_ID'],
@@ -30,12 +32,11 @@ try {
     $files = [];
     if (isset($objects['Contents'])) {
         foreach ($objects['Contents'] as $object) {
-            // Extract just the filename from the full path
-            $files[] = basename($object['Key']);
+            $files[] = $s3BaseUrl . $object['Key'];
         }
     }
 
-    echo json_encode($files);
+    echo json_encode($files, JSON_UNESCAPED_SLASHES);;
 } catch (AwsException $e) {
     http_response_code(500);
     echo json_encode(['error' => "Error fetching files: " . $e->getMessage()]);
