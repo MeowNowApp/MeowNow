@@ -3,7 +3,7 @@ services:
     build: .
     container_name: randomcat
     ports:
-      - "80:80"
+      - 80:80
     volumes:
       - ./website:/var/www/html
     env_file:
