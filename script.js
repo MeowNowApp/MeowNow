@@ -5,21 +5,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const fetchRandomCat = async () => {
     try {
       const response = await fetch("list.php");
-      const cats = await response.json();
 
-      if (!Array.isArray(cats)) {
-        throw new Error('Response is not an array');
+      // Log the raw response text first
+      const rawResponse = await response.text();
+
+      // Try parsing the response
+      try {
+        const cats = JSON.parse(rawResponse);
+
+        if (!Array.isArray(cats)) {
+          throw new Error('Response is not an array');
+        }
+
+        // Select a random image
+        const randomCat = cats[Math.floor(Math.random() * cats.length)];
+        
+        // Update the image URL to fetch from the compressed folder in S3
+        const imageUrl = `https://randomcatcompressed.s3.amazonaws.com/${randomCat}`;
+        
+        // Set the image source to the random cat image URL
+        catImage.src = imageUrl;
+      } catch (parseError) {
+        console.error("JSON Parsing Error:", parseError);
+        console.error("Could not parse response:", rawResponse);
       }
-
-      const randomCat = cats[Math.floor(Math.random() * cats.length)];
-      console.log("Random Cat URL:", randomCat);  // Log the URL from list.php
-
-      // Directly set the image source without modification
-      catImage.src = randomCat;
-      
-      console.log("Final Image URL:", catImage.src);  // Log after setting src
     } catch (error) {
-      console.error("Error fetching or processing cat list:", error);
+      console.error("Fetch Error:", error);
     }
   };
 
