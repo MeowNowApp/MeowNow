@@ -1,13 +1,13 @@
 # Random Cat Picture Website
 
-This is a personal project for hosting a website that displays a random picture of my cats on each page refresh. The images are served from the `./cats` directory, and the site uses basic HTML, CSS, JavaScript, and PHP to make it work.
+A fun personal project that displays a random picture of my cats on each page refresh. Images are served from the `./cats` directory, using simple HTML, CSS, JavaScript, and PHP.
 
 ## How It Works
 
-- **Random Image Selection:** JavaScript fetches a list of images from a PHP script and selects one at random to display.
+- **Random Image Selection:** JavaScript fetches a list of images from a PHP script and displays one at random.
 - **Dynamic Updates:** Any `.jpg` or `.png` files added to the `./cats` directory are automatically included.
 
-## File Overview
+## File Structure
 
 ```
 RandomCat/
@@ -15,16 +15,17 @@ RandomCat/
 ├── style.css        # Basic styling for the page
 ├── script.js        # Handles fetching and displaying random images
 ├── list.php         # Generates a list of image files in the cats directory
-└── cats/            # Where all the cat images are stored
+|── cats/            # Where all the cat images are stored
+└── .env             # Environment variables (not included in this example, however a template is provided in .env.example for reference)
 ```
 
 ## Purpose
 
-The site is hosted locally (or on `cats.wbreiler.com`) and is just for fun — a way to share random pictures of my cats with anyone visiting.
+Hosted locally via your favorite web server, or on `cats.wbreiler.com`, this project is a lighthearted way to share random cat pictures.
 
 ## Notes
 
-This isn't intended as a replicable project but rather a personal way to showcase my cats!
+This is a personal project and not meant for general use — just a fun way to showcase my cats!
 
 ---
 
