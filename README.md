@@ -11,6 +11,7 @@ A fun personal project that displays a random picture of my cats on each page re
 
 ```
 RandomCat/
+├── Dockerfile        # Configuration file for setting up the project in a container
 ├── index.html       # The main webpage
 ├── style.css        # Basic styling for the page
 ├── script.js        # Handles fetching and displaying random images
