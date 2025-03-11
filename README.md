@@ -15,8 +15,7 @@ RandomCat/
 ├── style.css        # Basic styling for the page
 ├── script.js        # Handles fetching and displaying random images
 ├── list.php         # Generates a list of image files in the cats directory
-|── cats/            # Where all the cat images are stored
-└── .env             # Environment variables (not included in this example, however a template is provided in .env.example for reference)
+└── cats/            # Where all the cat images are stored
 ```
 
 ## Purpose
