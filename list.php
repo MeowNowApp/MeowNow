@@ -10,7 +10,7 @@ if (!is_dir($directory)) {
 }
 
 $files = array_values(array_filter(scandir($directory), function ($file) use ($directory) {
-    return is_file("$directory/$file") && preg_match('/\.(jpg|png)$/i', $file);
+    return is_file("$directory/$file") && preg_match('/\.(jpg|png|jpeg)$/i', $file);
 }));
 
 echo json_encode($files);

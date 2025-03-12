@@ -1,21 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Upload Cat Image</title>
+    <title>Cat Image Upload</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Upload a Cat Image</h1>
-
-    <div id="cat-container">
-        <form action="uploadhandler.php" method="POST" enctype="multipart/form-data">
-            <input type="file" name="image" accept="image/jpeg, image/png" required>
-            <button id="refresh-button" type="submit">Upload</button>
-        </form>
-    </div>
-
-    <footer>
-      <p>Powered by cats 🐾 | <a href="https://wbreiler.com" target="_blank">wbreiler.com</a></p>
-    </footer>
+    <h1>Upload Your Cat Image</h1>
+    <form action="upload.php" method="POST" enctype="multipart/form-data">
+        <input type="file" name="catImage" accept="image/jpeg,image/png" required>
+        <button type="submit">Upload</button>
+    </form>
 </body>
 </html>
