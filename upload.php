@@ -71,6 +71,7 @@ function getUploadErrorMessage($errorCode) {
 echo '<!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Cat Images</title>
@@ -170,6 +171,9 @@ echo '
     </div>
 
     <script src="./upload.js"></script>
+    <footer>
+        <p><a href="index.html">Back to Cat Gallery</a></p>
+    </footer>
 </body>
 </html>';
 ?>
