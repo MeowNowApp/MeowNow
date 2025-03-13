@@ -46,6 +46,23 @@ h1 {
   object-fit: cover;
 }
 
+/* Ensure images have a max size and are responsive */
+img {
+  max-width: 80vh;
+  max-height: 80vh; /* Limits image height to 80% of the viewport height */
+  object-fit: contain; /* Keeps aspect ratio without cropping */
+  display: block; /* Removes inline spacing */
+  margin: 0 auto; /* Centers the image horizontally */
+}
+
+/* Optional: Add a container for better control */
+.image-container {
+  max-width: 600px; /* Adjust maximum width as needed */
+  margin: 0 auto; /* Center the container */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
 /* Button Styling */
 #refresh-button {
   margin-top: 20px;

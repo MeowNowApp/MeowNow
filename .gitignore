@@ -4,3 +4,4 @@ vendor/
 composer.lock
 .vscode/
 cats/
+compress.php

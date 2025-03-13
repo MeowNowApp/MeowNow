@@ -13,4 +13,10 @@ $files = array_values(array_filter(scandir($directory), function ($file) use ($d
     return is_file("$directory/$file") && preg_match('/\.(jpg|png|jpeg)$/i', $file);
 }));
 
+// Improved randomization using Fisher-Yates shuffle
+for ($i = count($files) - 1; $i > 0; $i--) {
+    $j = random_int(0, $i);
+    [$files[$i], $files[$j]] = [$files[$j], $files[$i]];
+}
+
 echo json_encode($files);

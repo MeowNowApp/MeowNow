@@ -15,6 +15,8 @@ $allowedExtensions = ['jpg', 'jpeg', 'png']; // Allowed file extensions
 $liveDir = './cats/'; // Upload directory: $PWD/cats
 $logDir = getcwd() . '/logs/'; // Log directory: $PWD/logs
 $logFile = $logDir . 'upload.log'; // Log file for tracking uploads and errors
+$compressionQuality = 60; // JPEG compression quality (0-100, lower = smaller file)
+$resizeScale = 0.4; // Scale factor for resizing (40% of original size)
 
 // Ensure the upload directory exists and is writable
 if (!is_dir($liveDir)) {
@@ -34,6 +36,72 @@ if (!is_dir($logDir)) {
 }
 if (!is_writable($logDir)) {
     die('Error: Log directory is not writable.');
+}
+
+// Function to compress and resize an image
+function compressAndResizeImage($sourcePath, $destinationPath, $quality, $scale) {
+    // Get image information
+    $imageInfo = getimagesize($sourcePath);
+    if (!$imageInfo) {
+        return false;
+    }
+    
+    $mime = $imageInfo['mime'];
+    
+    // Create image resource based on file type
+    switch ($mime) {
+        case 'image/jpeg':
+            $image = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $image = imagecreatefrompng($sourcePath);
+            break;
+        default:
+            return false;
+    }
+    
+    if (!$image) {
+        return false;
+    }
+    
+    // Calculate new dimensions
+    $width = imagesx($image);
+    $height = imagesy($image);
+    $newWidth = round($width * $scale);
+    $newHeight = round($height * $scale);
+    
+    // Create a new image with the new dimensions
+    $newImage = imagecreatetruecolor($newWidth, $newHeight);
+    
+    // Handle transparency for PNG images
+    if ($mime === 'image/png') {
+        imagealphablending($newImage, false);
+        imagesavealpha($newImage, true);
+        $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
+        imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
+    }
+    
+    // Resize the image
+    imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+    
+    // Save the image
+    $success = false;
+    switch ($mime) {
+        case 'image/jpeg':
+            $success = imagejpeg($newImage, $destinationPath, $quality);
+            break;
+        case 'image/png':
+            // PNG quality is 0-9, convert from 0-100 scale
+            $pngQuality = round((100 - $quality) / 11.1);
+            $success = imagepng($newImage, $destinationPath, $pngQuality);
+            break;
+    }
+    
+    // Free up memory
+    imagedestroy($image);
+    imagedestroy($newImage);
+    
+    return $success;
 }
 
 // Log function to write messages to the log file
@@ -146,9 +214,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['catImage'])) {
             $targetPath = $liveDir . $newFileName;
 
             if (move_uploaded_file($fileTmpName, $targetPath)) {
-                $successMessage = "Upload successful for $fileName. <a href='$targetPath' target='_blank'>View uploaded file</a>.";
-                echo '<div class="success">' . $successMessage . '</div>';
-                logMessage($successMessage);
+                // Compress and resize the uploaded image
+                $tempPath = $targetPath . '.temp';
+                rename($targetPath, $tempPath);
+                
+                if (compressAndResizeImage($tempPath, $targetPath, $compressionQuality, $resizeScale)) {
+                    // Get file sizes for logging
+                    $originalSize = filesize($tempPath);
+                    $compressedSize = filesize($targetPath);
+                    $sizeReduction = round(($originalSize - $compressedSize) / $originalSize * 100);
+                    
+                    // Remove the temporary file
+                    unlink($tempPath);
+                    
+                    $successMessage = "Upload successful for $fileName. Compressed from " . 
+                                     round($originalSize / 1024) . "KB to " . 
+                                     round($compressedSize / 1024) . "KB ($sizeReduction% reduction). " .
+                                     "<a href='$targetPath' target='_blank'>View uploaded file</a>.";
+                    echo '<div class="success">' . $successMessage . '</div>';
+                    logMessage($successMessage);
+                } else {
+                    // If compression fails, keep the original file
+                    rename($tempPath, $targetPath);
+                    $successMessage = "Upload successful for $fileName (compression failed). <a href='$targetPath' target='_blank'>View uploaded file</a>.";
+                    echo '<div class="success">' . $successMessage . '</div>';
+                    logMessage($successMessage);
+                }
             } else {
                 $errorMessage = "Error: Failed to upload $fileName.";
                 echo '<div class="error">' . htmlspecialchars($errorMessage) . '</div>';
