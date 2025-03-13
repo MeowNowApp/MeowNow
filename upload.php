@@ -1,4 +1,14 @@
 <?php
+// Load environment variables from .env file
+require 'vendor/autoload.php';
+
+// Load environment variables from .env file
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// Optional: validate required environment variables
+$dotenv->required(['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'S3_BUCKET']);
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -7,25 +17,18 @@ ini_set('display_errors', 1);
 ini_set('upload_max_filesize', '35M');
 ini_set('post_max_size', '40M');
 
-// Configuration
-$maxTotalSize = 250 * 1024 * 1024; // 250MB total
-$maxFileSize = 50 * 1024 * 1024; // 50MB per file
+// Configuration from environment variables
+$maxTotalSize = $_ENV['MAX_TOTAL_UPLOAD'] ?? 250 * 1024 * 1024; // 250MB total
+$maxFileSize = $_ENV['MAX_UPLOAD_SIZE'] ?? 50 * 1024 * 1024; // 50MB per file
 $allowedTypes = ['image/jpeg', 'image/png']; // Allowed MIME types
 $allowedExtensions = ['jpg', 'jpeg', 'png']; // Allowed file extensions
-$liveDir = './cats/'; // Upload directory: $PWD/cats
-$logDir = getcwd() . '/logs/'; // Log directory: $PWD/logs
+$logDir = $_ENV['LOG_DIRECTORY'] ?? getcwd() . '/logs/'; // Log directory
 $logFile = $logDir . 'upload.log'; // Log file for tracking uploads and errors
-$compressionQuality = 60; // JPEG compression quality (0-100, lower = smaller file)
 
-// Ensure the upload directory exists and is writable
-if (!is_dir($liveDir)) {
-    if (!mkdir($liveDir, 0755, true)) {
-        die('Error: Failed to create upload directory.');
-    }
-}
-if (!is_writable($liveDir)) {
-    die('Error: Upload directory is not writable.');
-}
+// AWS S3 Configuration from environment variables
+$awsRegion = $_ENV['AWS_REGION'];
+$s3Bucket = $_ENV['S3_BUCKET'];
+$s3Prefix = $_ENV['S3_PREFIX'] ?? 'cats/';
 
 // Ensure the log directory exists and is writable
 if (!is_dir($logDir)) {
@@ -35,91 +38,6 @@ if (!is_dir($logDir)) {
 }
 if (!is_writable($logDir)) {
     die('Error: Log directory is not writable.');
-}
-
-// Function to compress and resize an image
-function compressAndResizeImage($sourcePath, $destinationPath, $quality) {
-    // Get image information
-    $imageInfo = getimagesize($sourcePath);
-    if (!$imageInfo) {
-        return false;
-    }
-    
-    $mime = $imageInfo['mime'];
-    
-    // Create image resource based on file type
-    switch ($mime) {
-        case 'image/jpeg':
-            $image = imagecreatefromjpeg($sourcePath);
-            break;
-        case 'image/png':
-            $image = imagecreatefrompng($sourcePath);
-            break;
-        default:
-            return false;
-    }
-    
-    if (!$image) {
-        return false;
-    }
-    
-    // Fix orientation for JPEG images (based on EXIF data)
-    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
-        try {
-            $exif = @exif_read_data($sourcePath);
-            if ($exif && isset($exif['Orientation'])) {
-                $orientation = $exif['Orientation'];
-                
-                // Based on the orientation, rotate or flip the image
-                switch ($orientation) {
-                    case 2: // Horizontal flip
-                        imageflip($image, IMG_FLIP_HORIZONTAL);
-                        break;
-                    case 3: // 180 degree rotation
-                        $image = imagerotate($image, 180, 0);
-                        break;
-                    case 4: // Vertical flip
-                        imageflip($image, IMG_FLIP_VERTICAL);
-                        break;
-                    case 5: // Vertical flip + 90 rotate right
-                        imageflip($image, IMG_FLIP_VERTICAL);
-                        $image = imagerotate($image, -90, 0);
-                        break;
-                    case 6: // 90 degree rotate right
-                        $image = imagerotate($image, -90, 0);
-                        break;
-                    case 7: // Horizontal flip + 90 rotate right
-                        imageflip($image, IMG_FLIP_HORIZONTAL);
-                        $image = imagerotate($image, -90, 0);
-                        break;
-                    case 8: // 90 degree rotate left
-                        $image = imagerotate($image, 90, 0);
-                        break;
-                }
-            }
-        } catch (Exception $e) {
-            // If there's an error reading EXIF data, continue without orientation fix
-            logMessage("EXIF read error for " . basename($sourcePath) . ": " . $e->getMessage());
-        }
-    }
-    
-    // Save the image with compression
-    $success = false;
-    switch ($mime) {
-        case 'image/jpeg':
-            $success = imagejpeg($image, $destinationPath, $quality);
-            break;
-        case 'image/png':
-            // PNG quality is 0-9, convert from 0-100 scale
-            $pngQuality = round((100 - $quality) / 11.1);
-            $success = imagepng($image, $destinationPath, $pngQuality);
-            break;
-    }
-    
-    // Free up memory
-    imagedestroy($image);
-    
-    return $success;
 }
 
 // Log function to write messages to the log file
@@ -150,6 +68,38 @@ function getUploadErrorMessage($errorCode) {
             return "A PHP extension stopped the file upload.";
         default:
             return "Unknown upload error.";
+    }
+}
+
+// Function to upload a file to S3
+function uploadToS3($filePath, $s3Key) {
+    global $awsRegion, $s3Bucket;
+    
+    try {
+        // Create an S3 client with credentials from environment variables
+        $s3 = new Aws\S3\S3Client([
+            'version' => 'latest',
+            'region'  => $awsRegion,
+            'credentials' => [
+                'key'    => $_ENV['AWS_ACCESS_KEY_ID'],
+                'secret' => $_ENV['AWS_SECRET_ACCESS_KEY'],
+            ]
+        ]);
+        
+        // Upload the file to S3
+        $result = $s3->putObject([
+            'Bucket' => $s3Bucket,
+            'Key'    => $s3Key,
+            'SourceFile' => $filePath,
+            'ACL'    => 'public-read', // Make the file publicly accessible
+            'ContentType' => mime_content_type($filePath)
+        ]);
+        
+        // Return the URL of the uploaded file
+        return $result['ObjectURL'];
+    } catch (Exception $e) {
+        logMessage("S3 upload error: " . $e->getMessage());
+        return false;
     }
 }
 
@@ -190,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['catImage'])) {
     // Calculate total upload size
     $totalSize = array_sum($files['size']);
     if ($totalSize > $maxTotalSize) {
-        $errorMessage = 'Error: Total upload size exceeds the 50MB limit.';
+        $errorMessage = 'Error: Total upload size exceeds the 250MB limit.';
         logMessage($errorMessage);
         echo '<div class="error">' . htmlspecialchars($errorMessage) . '</div>';
     } else {
@@ -210,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['catImage'])) {
 
             // Validate file size
             if ($fileSize > $maxFileSize) {
-                $errorMessage = "Error: File $fileName exceeds the 10MB limit.";
+                $errorMessage = "Error: File $fileName exceeds the 50MB limit.";
                 echo '<div class="error">' . htmlspecialchars($errorMessage) . '</div>';
                 logMessage($errorMessage);
                 continue;
@@ -227,39 +177,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['catImage'])) {
                 continue;
             }
 
-            // Generate a unique name and save the file to the live folder
+            // Generate a unique name for the S3 object
             $newFileName = uniqid('cat_', true) . '.' . $fileExtension;
-            $targetPath = $liveDir . $newFileName;
-
-            if (move_uploaded_file($fileTmpName, $targetPath)) {
-                // Compress and resize the uploaded image
-                $tempPath = $targetPath . '.temp';
-                rename($targetPath, $tempPath);
+            $s3Key = $s3Prefix . $newFileName;
+            
+            // Upload the file to S3
+            $s3Url = uploadToS3($fileTmpName, $s3Key);
+            
+            if ($s3Url) {
+                $successMessage = "Upload successful for $fileName. <a href='$s3Url' target='_blank'>View uploaded file</a>.";
+                echo '<div class="success">' . $successMessage . '</div>';
+                logMessage("Uploaded $fileName to S3: $s3Url");
                 
-                if (compressAndResizeImage($tempPath, $targetPath, $compressionQuality)) {
-                    // Get file sizes for logging
-                    $originalSize = filesize($tempPath);
-                    $compressedSize = filesize($targetPath);
-                    $sizeReduction = round(($originalSize - $compressedSize) / $originalSize * 100);
-                    
-                    // Remove the temporary file
-                    unlink($tempPath);
-                    
-                    $successMessage = "Upload successful for $fileName. Compressed from " . 
-                                     round($originalSize / 1024) . "KB to " . 
-                                     round($compressedSize / 1024) . "KB ($sizeReduction% reduction). " .
-                                     "<a href='$targetPath' target='_blank'>View uploaded file</a>.";
-                    echo '<div class="success">' . $successMessage . '</div>';
-                    logMessage($successMessage);
-                } else {
-                    // If compression fails, keep the original file
-                    rename($tempPath, $targetPath);
-                    $successMessage = "Upload successful for $fileName (compression failed). <a href='$targetPath' target='_blank'>View uploaded file</a>.";
-                    echo '<div class="success">' . $successMessage . '</div>';
-                    logMessage($successMessage);
+                // Add the file to the list of available cat images
+                $catListFile = 'cat_list.json';
+                $catList = [];
+                if (file_exists($catListFile)) {
+                    $catList = json_decode(file_get_contents($catListFile), true) ?: [];
                 }
+                $catList[] = [
+                    'key' => $s3Key,
+                    'url' => $s3Url,
+                    'filename' => $newFileName,
+                    'uploaded' => date('Y-m-d H:i:s')
+                ];
+                file_put_contents($catListFile, json_encode($catList, JSON_PRETTY_PRINT));
             } else {
-                $errorMessage = "Error: Failed to upload $fileName.";
+                $errorMessage = "Error: Failed to upload $fileName to S3.";
                 echo '<div class="error">' . htmlspecialchars($errorMessage) . '</div>';
                 logMessage($errorMessage);
             }
