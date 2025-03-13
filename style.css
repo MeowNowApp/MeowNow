@@ -1,104 +1,122 @@
-/* General Reset */
+/* Main styles for MeowNow */
+
+/* Base styles */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* Body Styling */
 body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
-  color: #333;
-  padding: 20px;
-  text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9f9f9;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
 }
 
-/* Header */
 h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  color: #2c3e50;
+    margin: 20px 0;
+    color: #444;
+    font-size: 2.5rem;
 }
 
-/* Cat Image Styling */
+/* Cat image container */
 #cat-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 600px;
-  overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: #fff;
+    margin: 20px auto;
+    max-width: 800px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    min-height: 300px; /* Minimum height to prevent layout shift */
 }
 
 #cat-image {
-  width: 100%;
-  height: auto;
-  border-radius: 15px;
-  object-fit: cover;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    /* Add image orientation fix for browsers that support it */
+    image-orientation: from-image;
 }
 
-/* Ensure images have a max size and are responsive */
-img {
-  max-width: 80vh;
-  max-height: 80vh; /* Limits image height to 80% of the viewport height */
-  object-fit: contain; /* Keeps aspect ratio without cropping */
-  display: block; /* Removes inline spacing */
-  margin: 0 auto; /* Centers the image horizontally */
-}
-
-/* Optional: Add a container for better control */
-.image-container {
-  max-width: 600px; /* Adjust maximum width as needed */
-  margin: 0 auto; /* Center the container */
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-/* Button Styling */
+/* Button styles */
 #refresh-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  color: #fff;
-  background: #3498db;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 20px 0;
 }
 
 #refresh-button:hover {
-  background: #2980b9;
-  transform: translateY(-2px);
+    background-color: #45a049;
 }
 
 #refresh-button:active {
-  background: #1f6088;
-  transform: translateY(0);
+    transform: translateY(1px);
 }
 
-/* Footer */
+/* Image info display */
+.image-info {
+    margin: 15px auto;
+    max-width: 800px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Footer styles */
 footer {
-  margin-top: 30px;
-  font-size: 0.9rem;
-  color: #555;
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 0.9rem;
 }
 
 footer a {
-  color: #3498db;
-  text-decoration: none;
+    color: #4CAF50;
+    text-decoration: none;
 }
 
 footer a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    #cat-container {
+        min-height: 200px;
+    }
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite ease-in-out;
 }

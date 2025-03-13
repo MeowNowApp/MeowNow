@@ -16,7 +16,6 @@ $liveDir = './cats/'; // Upload directory: $PWD/cats
 $logDir = getcwd() . '/logs/'; // Log directory: $PWD/logs
 $logFile = $logDir . 'upload.log'; // Log file for tracking uploads and errors
 $compressionQuality = 60; // JPEG compression quality (0-100, lower = smaller file)
-$resizeScale = 0.4; // Scale factor for resizing (40% of original size)
 
 // Ensure the upload directory exists and is writable
 if (!is_dir($liveDir)) {
@@ -62,6 +61,46 @@ function compressAndResizeImage($sourcePath, $destinationPath, $quality, $scale)
     
     if (!$image) {
         return false;
+    }
+    
+    // Fix orientation for JPEG images (based on EXIF data)
+    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
+        try {
+            $exif = @exif_read_data($sourcePath);
+            if ($exif && isset($exif['Orientation'])) {
+                $orientation = $exif['Orientation'];
+                
+                // Based on the orientation, rotate or flip the image
+                switch ($orientation) {
+                    case 2: // Horizontal flip
+                        imageflip($image, IMG_FLIP_HORIZONTAL);
+                        break;
+                    case 3: // 180 degree rotation
+                        $image = imagerotate($image, 180, 0);
+                        break;
+                    case 4: // Vertical flip
+                        imageflip($image, IMG_FLIP_VERTICAL);
+                        break;
+                    case 5: // Vertical flip + 90 rotate right
+                        imageflip($image, IMG_FLIP_VERTICAL);
+                        $image = imagerotate($image, -90, 0);
+                        break;
+                    case 6: // 90 degree rotate right
+                        $image = imagerotate($image, -90, 0);
+                        break;
+                    case 7: // Horizontal flip + 90 rotate right
+                        imageflip($image, IMG_FLIP_HORIZONTAL);
+                        $image = imagerotate($image, -90, 0);
+                        break;
+                    case 8: // 90 degree rotate left
+                        $image = imagerotate($image, 90, 0);
+                        break;
+                }
+            }
+        } catch (Exception $e) {
+            // If there's an error reading EXIF data, continue without orientation fix
+            logMessage("EXIF read error for " . basename($sourcePath) . ": " . $e->getMessage());
+        }
     }
     
     // Calculate new dimensions
