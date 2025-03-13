@@ -1,7 +1,19 @@
-.DS_Store
+# Environment variables
 .env
-vendor/
-composer.lock
+
+# Composer dependencies
+./vendor/
+
+# Logs
+./logs/
+
+# Local development
+.DS_Store
+
+# IDE files
+.idea/
 .vscode/
+
+composer.lock
 cats/
 compress.php
