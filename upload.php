@@ -38,7 +38,7 @@ if (!is_writable($logDir)) {
 }
 
 // Function to compress and resize an image
-function compressAndResizeImage($sourcePath, $destinationPath, $quality, $scale) {
+function compressAndResizeImage($sourcePath, $destinationPath, $quality) {
     // Get image information
     $imageInfo = getimagesize($sourcePath);
     if (!$imageInfo) {
@@ -103,42 +103,21 @@ function compressAndResizeImage($sourcePath, $destinationPath, $quality, $scale)
         }
     }
     
-    // Calculate new dimensions
-    $width = imagesx($image);
-    $height = imagesy($image);
-    $newWidth = round($width * $scale);
-    $newHeight = round($height * $scale);
-    
-    // Create a new image with the new dimensions
-    $newImage = imagecreatetruecolor($newWidth, $newHeight);
-    
-    // Handle transparency for PNG images
-    if ($mime === 'image/png') {
-        imagealphablending($newImage, false);
-        imagesavealpha($newImage, true);
-        $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
-        imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
-    }
-    
-    // Resize the image
-    imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-    
-    // Save the image
+    // Save the image with compression
     $success = false;
     switch ($mime) {
         case 'image/jpeg':
-            $success = imagejpeg($newImage, $destinationPath, $quality);
+            $success = imagejpeg($image, $destinationPath, $quality);
             break;
         case 'image/png':
             // PNG quality is 0-9, convert from 0-100 scale
             $pngQuality = round((100 - $quality) / 11.1);
-            $success = imagepng($newImage, $destinationPath, $pngQuality);
+            $success = imagepng($image, $destinationPath, $pngQuality);
             break;
     }
     
     // Free up memory
     imagedestroy($image);
-    imagedestroy($newImage);
     
     return $success;
 }
@@ -257,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['catImage'])) {
                 $tempPath = $targetPath . '.temp';
                 rename($targetPath, $tempPath);
                 
-                if (compressAndResizeImage($tempPath, $targetPath, $compressionQuality, $resizeScale)) {
+                if (compressAndResizeImage($tempPath, $targetPath, $compressionQuality)) {
                     // Get file sizes for logging
                     $originalSize = filesize($tempPath);
                     $compressedSize = filesize($targetPath);

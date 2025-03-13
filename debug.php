@@ -132,31 +132,32 @@ echo '</div>';
 
 // Test serve-image.php with a sample image
 echo '<div class="section">
-    <h2>Image Serving Test</h2>';
+    <h2>Direct Image Access Test</h2>';
 if (count($files) > 0) {
     $testImage = $files[0];
-    $imageUrl = 'serve-image.php?img=' . urlencode($testImage);
-    echo '<p>Testing image: ' . htmlspecialchars($testImage) . '</p>';
-    echo '<p>URL: ' . htmlspecialchars($imageUrl) . '</p>';
+    $directUrl = $catsDir . $testImage;
+    echo '<p>Testing direct image access: ' . htmlspecialchars($testImage) . '</p>';
+    echo '<p>URL: ' . htmlspecialchars($directUrl) . '</p>';
     
-    // Try to get headers
-    $headers = @get_headers($imageUrl);
-    if ($headers) {
-        $statusLine = $headers[0];
-        if (strpos($statusLine, '200') !== false) {
-            echo '<p class="success">✓ serve-image.php returns HTTP 200 OK for the test image</p>';
-        } else {
-            echo '<p class="error">✗ serve-image.php returns non-200 status: ' . htmlspecialchars($statusLine) . '</p>';
-        }
+    // Check if the file exists and is readable
+    if (file_exists($directUrl) && is_readable($directUrl)) {
+        echo '<p class="success">✓ Image file exists and is readable</p>';
+        
+        // Get file information
+        $fileSize = filesize($directUrl);
+        $fileMime = mime_content_type($directUrl);
+        
+        echo '<p>File size: ' . round($fileSize / 1024, 2) . ' KB</p>';
+        echo '<p>MIME type: ' . $fileMime . '</p>';
+        
+        // Display the test image directly
+        echo '<p>Test image display:</p>';
+        echo '<img src="' . htmlspecialchars($directUrl) . '" alt="Test image">';
     } else {
-        echo '<p class="error">✗ Could not get headers from serve-image.php</p>';
+        echo '<p class="error">✗ Image file does not exist or is not readable</p>';
     }
-    
-    // Display the test image
-    echo '<p>Test image display:</p>';
-    echo '<img src="' . htmlspecialchars($imageUrl) . '" alt="Test image">';
 } else {
-    echo '<p class="warning">⚠ No images available to test serve-image.php</p>';
+    echo '<p class="warning">⚠ No images available to test</p>';
 }
 echo '</div>';
 
@@ -171,7 +172,7 @@ echo '<div class="section">
             const resultElement = document.getElementById("js-test-result");
             resultElement.textContent = "Fetching from list.php...";
             
-            fetch("list.php?random=true&limit=1")
+            fetch("list.php")
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -180,13 +181,18 @@ echo '<div class="section">
                 })
                 .then(data => {
                     resultElement.innerHTML = `<span class="success">✓ Successfully fetched data from list.php</span><br>`;
-                    if (data.images && data.images.length > 0) {
-                        resultElement.innerHTML += `<span class="success">✓ Found ${data.images.length} images</span><br>`;
-                        resultElement.innerHTML += `First image: ${data.images[0].filename}<br>`;
-                        resultElement.innerHTML += `URL: ${data.images[0].url}<br>`;
-                        resultElement.innerHTML += `<img src="${data.images[0].url}" alt="Test image">`;
+                    if (data && Array.isArray(data)) {
+                        resultElement.innerHTML += `<span class="success">✓ Found ${data.length} images</span><br>`;
+                        if (data.length > 0) {
+                            resultElement.innerHTML += `First image: ${data[0]}<br>`;
+                            resultElement.innerHTML += `URL: ./cats/${data[0]}<br>`;
+                            resultElement.innerHTML += `<img src="./cats/${data[0]}" alt="Test image">`;
+                        } else {
+                            resultElement.innerHTML += `<span class="warning">⚠ No images found in the response</span>`;
+                        }
                     } else {
-                        resultElement.innerHTML += `<span class="warning">⚠ No images found in the response</span>`;
+                        resultElement.innerHTML += `<span class="error">✗ Response is not an array of image filenames</span>`;
+                        resultElement.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
                     }
                 })
                 .catch(error => {

@@ -20,13 +20,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // Simple function to get a list of cat images directly
     async function getDirectCatList() {
         try {
-            console.log("Getting direct cat list...");
+            // console.log("Getting direct cat list...");
             const response = await fetch("list.php");
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-            console.log("Direct cat list:", data);
+            // console.log("Direct cat list:", data);
             return data;
         } catch (error) {
             console.error("Error getting direct cat list:", error);

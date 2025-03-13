@@ -41,7 +41,14 @@ h1 {
     max-width: 100%;
     height: auto;
     margin: 0 auto;
-    /* Add image orientation fix for browsers that support it */
+    /* Add image orientation fix for all browsers */
+    image-orientation: from-image;
+    /* Fallback for browsers that don't support image-orientation */
+    transform: rotate(0deg);
+}
+
+/* Fix for specific orientation issues in all browsers */
+.orientation-fix {
     image-orientation: from-image;
 }
 
