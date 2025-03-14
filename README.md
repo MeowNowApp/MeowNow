@@ -109,7 +109,7 @@ curl -o cat.jpg https://api.meownow.app/?format=image
 <img src="https://api.meownow.app/" alt="Random Cat">
 ```
 
-For more details, see the [API Documentation](api-docs.html).
+For more details, see the [API Documentation](api-docs.html) or the [API Documentation (Markdown)](api-docs.md).
 
 ## Privacy Policy
 
