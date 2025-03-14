@@ -12,6 +12,7 @@ A simple and elegant web application for displaying and sharing random cat image
 - **Keyboard Shortcuts**: Press spacebar to show another cat
 - **Fallback CSS**: Multiple layers of CSS fallback to ensure the site always looks good
 - **Cloud Storage**: Uses AWS S3 for reliable, scalable image storage
+- **Public API**: Access random cat images programmatically via API
 
 ## AWS Architecture
 
@@ -81,6 +82,34 @@ MeowNow works on all modern browsers including:
   - Caching of processed images for faster subsequent access
   - Reduced load on the web server by offloading image processing
   - Automatic scaling to handle traffic spikes
+
+## API
+
+MeowNow provides a simple API for accessing random cat images programmatically. The API is available at `https://api.meownow.app/`.
+
+### Basic Usage
+
+```bash
+# Get a random cat image (redirects to the image URL)
+curl https://api.meownow.app/
+
+# Get JSON metadata about a random cat image
+curl https://api.meownow.app/?format=json
+
+# Get just the URL as plain text
+curl https://api.meownow.app/?format=url
+
+# Download the image directly
+curl -o cat.jpg https://api.meownow.app/?format=image
+```
+
+### Using in HTML
+
+```html
+<img src="https://api.meownow.app/" alt="Random Cat">
+```
+
+For more details, see the [API Documentation](api-docs.html).
 
 ## Privacy Policy
 
