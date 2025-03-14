@@ -7,7 +7,7 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // Optional: validate required environment variables
-$dotenv->required(['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'S3_BUCKET']);
+$dotenv->required(['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'S3_COMPRESSED_BUCKET']);
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);
@@ -18,15 +18,15 @@ header('Content-Type: application/json');
 
 // AWS S3 Configuration from environment variables
 $awsRegion = $_ENV['AWS_REGION'];
-$s3Bucket = $_ENV['S3_BUCKET'];
-$s3Prefix = $_ENV['S3_PREFIX'] ?? 'cats/';
+$s3CompressedBucket = $_ENV['S3_COMPRESSED_BUCKET'];
 
-// Local file that stores the list of uploaded images
+// Local file that stores the list of uploaded images (cache and fallback)
 $catListFile = 'cat_list.json';
+$cacheExpiryTime = 3600; // Cache expiry time in seconds (1 hour)
 
-// Function to get cat images from S3
+// Function to get cat images from S3 compressed bucket
 function getCatsFromS3() {
-    global $awsRegion, $s3Bucket, $s3Prefix;
+    global $awsRegion, $s3CompressedBucket;
     
     try {
         // Create an S3 client with credentials from environment variables
@@ -39,10 +39,9 @@ function getCatsFromS3() {
             ]
         ]);
         
-        // List objects in the bucket with the specified prefix
+        // List all objects in the compressed bucket
         $result = $s3->listObjects([
-            'Bucket' => $s3Bucket,
-            'Prefix' => $s3Prefix
+            'Bucket' => $s3CompressedBucket
         ]);
         
         $cats = [];
@@ -50,11 +49,11 @@ function getCatsFromS3() {
         // Process the results
         if (isset($result['Contents'])) {
             foreach ($result['Contents'] as $object) {
-                // Skip the prefix directory itself
-                if ($object['Key'] !== $s3Prefix) {
+                // Only include image files
+                if (preg_match('/\.(jpe?g|png)$/i', $object['Key'])) {
                     $cats[] = [
                         'key' => $object['Key'],
-                        'url' => $s3->getObjectUrl($s3Bucket, $object['Key']),
+                        'url' => $s3->getObjectUrl($s3CompressedBucket, $object['Key']),
                         'filename' => basename($object['Key']),
                         'lastModified' => $object['LastModified']->format('Y-m-d H:i:s')
                     ];
@@ -70,7 +69,7 @@ function getCatsFromS3() {
     }
 }
 
-// Function to get cat images from the local JSON file
+// Function to get cat images from the local JSON file (cache/fallback)
 function getCatsFromLocalFile() {
     global $catListFile;
     
@@ -82,22 +81,53 @@ function getCatsFromLocalFile() {
     return [];
 }
 
-// Try to get cats from S3 first, fall back to local file if that fails
-$cats = getCatsFromS3();
+// Function to save cat images to the local JSON file (cache)
+function saveCatsToLocalFile($cats) {
+    global $catListFile;
+    
+    // Add timestamp for cache management
+    $data = [
+        'timestamp' => time(),
+        'cats' => $cats
+    ];
+    
+    // Save to file
+    file_put_contents($catListFile, json_encode($data, JSON_PRETTY_PRINT));
+}
 
-// If S3 failed or returned no results, try the local file
-if (empty($cats)) {
-    $cats = getCatsFromLocalFile();
+// Check if we have a valid cache
+$useCache = false;
+if (file_exists($catListFile)) {
+    $cacheData = json_decode(file_get_contents($catListFile), true);
+    
+    // Check if cache is valid (not expired)
+    if (isset($cacheData['timestamp']) && 
+        (time() - $cacheData['timestamp'] < $cacheExpiryTime)) {
+        $useCache = true;
+        $cats = $cacheData['cats'];
+    }
+}
+
+// If cache is not valid, fetch from S3
+if (!$useCache) {
+    $cats = getCatsFromS3();
+    
+    // If we got cats from S3, update the cache
+    if (!empty($cats)) {
+        saveCatsToLocalFile($cats);
+    } else {
+        // If S3 failed, try to use the cache even if expired
+        $cacheData = getCatsFromLocalFile();
+        if (isset($cacheData['cats'])) {
+            $cats = $cacheData['cats'];
+        }
+    }
 }
 
 // If we have cats, return them as JSON
 if (!empty($cats)) {
-    // For backward compatibility with the old format, just return the URLs
-    $urls = array_map(function($cat) {
-        return $cat['filename']; // For backward compatibility, return just the filename
-    }, $cats);
-    
-    echo json_encode($urls);
+    // Return the full cat objects with URLs
+    echo json_encode($cats);
 } else {
     // Return an empty array if no cats were found
     echo json_encode([]);

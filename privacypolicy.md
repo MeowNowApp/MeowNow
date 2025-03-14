@@ -20,6 +20,7 @@ We collect information that you voluntarily provide when you use our website, in
 ### 2.2 Information Collected Automatically
 
 When you visit our website, we automatically collect certain information, including:
+
 - IP address (partially anonymized)
 - Browser type and version
 - Operating system
@@ -31,6 +32,7 @@ We use this information solely for the purpose of improving our website and serv
 ## 3. How We Use Your Information
 
 We use the information we collect for the following purposes:
+
 - To provide and maintain our service
 - To process and display the images you upload
 - To improve and optimize our website
@@ -56,6 +58,7 @@ We do not sell, trade, or otherwise transfer your personal information to third 
 Depending on your location, you may have certain rights regarding your personal data:
 
 ### 6.1 For EU Residents (GDPR)
+
 - Right to access your personal data
 - Right to rectification of inaccurate data
 - Right to erasure ("right to be forgotten")
@@ -65,6 +68,7 @@ Depending on your location, you may have certain rights regarding your personal 
 - Right to withdraw consent
 
 ### 6.2 For California Residents (CCPA/CPRA)
+
 - Right to know what personal information is collected
 - Right to know whether personal information is sold or disclosed
 - Right to say no to the sale of personal information
@@ -101,4 +105,4 @@ You are advised to review this Privacy Policy periodically for any changes. Chan
 
 If you have any questions about this Privacy Policy or our data practices, please contact us at:
 
-Email: privacy@meownow.app 
+Email: [privacy@meownow.app](mailto:privacy@meownow.app)
