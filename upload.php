@@ -27,8 +27,8 @@ $logFile = $logDir . 'upload.log'; // Log file for tracking uploads and errors
 
 // AWS S3 Configuration from environment variables
 $awsRegion = $_ENV['AWS_REGION'];
-$s3Bucket = $_ENV['S3_BUCKET'];
-$s3Prefix = $_ENV['S3_PREFIX'] ?? 'cats/';
+$s3RawBucket = $_ENV['S3_RAW_BUCKET'];
+$s3Prefix = $_ENV['S3_PREFIX'] ?? '';
 
 // Ensure the log directory exists and is writable
 if (!is_dir($logDir)) {
@@ -42,11 +42,49 @@ if (!is_writable($logDir)) {
 
 // Log function to write messages to the log file
 function logMessage($message) {
-    global $logFile;
+    global $logFile, $logDir;
+    
+    // Anonymize IP address by removing the last octet
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+    $anonymizedIp = preg_replace('/(\d+\.\d+\.\d+\.)\d+/', '$1xxx', $ip);
+    
     $timestamp = date('Y-m-d H:i:s');
-    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR']; // Get the user's IP address (handles proxies)
-    $logEntry = "[$timestamp] [IP: $ip] $message" . PHP_EOL;
+    $logEntry = "[$timestamp] [IP: $anonymizedIp] $message" . PHP_EOL;
     file_put_contents($logFile, $logEntry, FILE_APPEND);
+    
+    // Perform log rotation - delete logs older than 30 days
+    rotateLogFiles($logDir, 30);
+}
+
+// Function to rotate log files (delete logs older than specified days)
+function rotateLogFiles($logDir, $maxAgeDays) {
+    // Only run log rotation occasionally (1% chance) to avoid performance impact
+    if (rand(1, 100) > 1) {
+        return;
+    }
+    
+    $now = time();
+    $maxAgeSeconds = $maxAgeDays * 86400; // Convert days to seconds
+    
+    // Scan the log directory
+    $logFiles = glob($logDir . '*.log');
+    foreach ($logFiles as $file) {
+        // Skip the current log file
+        if ($file === $GLOBALS['logFile']) {
+            continue;
+        }
+        
+        // Check file age
+        $fileAge = $now - filemtime($file);
+        if ($fileAge > $maxAgeSeconds) {
+            // Log the deletion
+            $deletionMessage = "Deleted old log file: " . basename($file) . " (age: " . round($fileAge / 86400, 1) . " days)";
+            file_put_contents($GLOBALS['logFile'], "[" . date('Y-m-d H:i:s') . "] [SYSTEM] $deletionMessage" . PHP_EOL, FILE_APPEND);
+            
+            // Delete the file
+            unlink($file);
+        }
+    }
 }
 
 // Function to translate error codes into human-readable messages
@@ -73,7 +111,7 @@ function getUploadErrorMessage($errorCode) {
 
 // Function to upload a file to S3
 function uploadToS3($filePath, $s3Key) {
-    global $awsRegion, $s3Bucket;
+    global $awsRegion, $s3RawBucket;
     
     try {
         // Create an S3 client with credentials from environment variables
@@ -86,9 +124,9 @@ function uploadToS3($filePath, $s3Key) {
             ]
         ]);
         
-        // Upload the file to S3
+        // Upload the file to S3 raw bucket
         $result = $s3->putObject([
-            'Bucket' => $s3Bucket,
+            'Bucket' => $s3RawBucket,
             'Key'    => $s3Key,
             'SourceFile' => $filePath,
             'ACL'    => 'public-read', // Make the file publicly accessible
@@ -225,7 +263,7 @@ echo '
 
     <script src="./upload.js"></script>
     <footer>
-        <p><a href="index.html">Back to Cat Gallery</a></p>
+        <p><a href="index.html">Back to Cat Gallery</a> | <a href="privacy-policy.html">Privacy Policy</a></p>
     </footer>
 </body>
 </html>';

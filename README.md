@@ -9,7 +9,7 @@ A simple and elegant web application for displaying and sharing random cat image
 - **Image Upload**: Users can upload their own cat photos directly to S3
 - **On-the-fly Compression**: Uses AWS Lambda to compress images when they're accessed
 - **EXIF Orientation Fix**: Automatically corrects image orientation based on EXIF data
-- **Keyboard Shortcuts**: Press spacebar to show another cat
+- **Keyboard Shortcuts**: Press space bar to show another cat
 - **Fallback CSS**: Multiple layers of CSS fallback to ensure the site always looks good
 - **Cloud Storage**: Uses AWS S3 for reliable, scalable image storage
 
@@ -17,16 +17,20 @@ A simple and elegant web application for displaying and sharing random cat image
 
 ### S3 Storage
 
-Images are stored in Amazon S3, providing durable and scalable object storage.
+The application uses a two-bucket approach for image storage:
+
+- **Raw Bucket (meownowraw)**: Stores original, unprocessed images uploaded by users
+- **Compressed Bucket (meownowcompressed)**: Stores processed, optimized images for display
 
 ### Lambda Image Processing
 
 The application uses AWS Lambda for on-the-fly image compression and processing:
 
-1. Original images are uploaded directly to S3
+1. Original images are uploaded directly to the raw S3 bucket
 2. When an image is requested, a Lambda function is triggered
-3. The Lambda function retrieves the original image, compresses it, and returns the optimized version
-4. Processed images can be cached for improved performance
+3. The Lambda function retrieves the original image from the raw bucket, compresses it, and saves it to the compressed bucket
+4. The web application serves images from the compressed bucket
+5. Processed images are cached in the compressed bucket for improved performance
 
 This serverless approach eliminates the need for server-side compression during upload and allows for dynamic resizing and optimization based on the requesting device.
 
