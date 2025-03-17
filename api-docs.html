@@ -14,7 +14,7 @@
         
         <div class="endpoint">
             <h3>Get Random Cat</h3>
-            <div class="endpoint-url">GET https://api.meownow.app/</div>
+            <div class="endpoint-url">GET https://api.meownow.app/api/v1/</div>
             
             <h4>Description</h4>
             <p>Returns a random cat image from our collection. By default, this endpoint redirects to the image URL.</p>
@@ -63,13 +63,13 @@
             
             <div class="example">
                 <h5>Basic Usage (Redirect)</h5>
-                <pre>curl https://api.meownow.app/</pre>
+                <pre>curl https://api.meownow.app/api/v1/</pre>
                 <p class="response">Response: HTTP 302 redirect to the image URL</p>
             </div>
             
             <div class="example">
                 <h5>Get JSON Response</h5>
-                <pre>curl https://api.meownow.app/?format=json</pre>
+                <pre>curl https://api.meownow.app/api/v1/?format=json</pre>
                 <p class="response">Response:</p>
                 <pre>{
   "success": true,
@@ -78,32 +78,33 @@
     "url": "https://meownowcompressed.s3.amazonaws.com/cat_1234567890.jpg",
     "filename": "cat_1234567890.jpg",
     "lastModified": "2025-03-15 12:34:56"
-  }
+  },
+  "api_version": "v1"
 }</pre>
             </div>
             
             <div class="example">
                 <h5>Get Image URL as Text</h5>
-                <pre>curl https://api.meownow.app/?format=url</pre>
+                <pre>curl https://api.meownow.app/api/v1/?format=url</pre>
                 <p class="response">Response:</p>
                 <pre>https://meownowcompressed.s3.amazonaws.com/cat_1234567890.jpg</pre>
             </div>
             
             <div class="example">
                 <h5>Download Image Directly</h5>
-                <pre>curl -o cat.jpg https://api.meownow.app/?format=image</pre>
+                <pre>curl -o cat.jpg https://api.meownow.app/api/v1/?format=image</pre>
                 <p class="response">Response: The actual image file</p>
             </div>
             
             <div class="example">
                 <h5>Using in HTML</h5>
-                <pre>&lt;img src="https://api.meownow.app/" alt="Random Cat"&gt;</pre>
+                <pre>&lt;img src="https://api.meownow.app/api/v1/" alt="Random Cat"&gt;</pre>
                 <p class="response">Result: Displays a random cat image that changes on page refresh</p>
             </div>
             
             <div class="example">
                 <h5>Using with JavaScript</h5>
-                <pre>fetch('https://api.meownow.app/?format=json')
+                <pre>fetch('https://api.meownow.app/api/v1/?format=json')
   .then(response => response.json())
   .then(data => {
     if (data.success) {

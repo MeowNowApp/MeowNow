@@ -5,7 +5,7 @@ Welcome to the MeowNow API! This simple API allows you to get random cat images 
 ## Get Random Cat
 
 ```
-GET https://api.meownow.app/
+GET https://api.meownow.app/api/v1/
 ```
 
 ### Description
@@ -32,7 +32,7 @@ Returns a random cat image from our collection. By default, this endpoint redire
 #### Basic Usage (Redirect)
 
 ```bash
-curl https://api.meownow.app/
+curl https://api.meownow.app/api/v1/
 ```
 
 Response: HTTP 302 redirect to the image URL
@@ -40,7 +40,7 @@ Response: HTTP 302 redirect to the image URL
 #### Get JSON Response
 
 ```bash
-curl https://api.meownow.app/?format=json
+curl https://api.meownow.app/api/v1/?format=json
 ```
 
 Response:
@@ -52,14 +52,15 @@ Response:
     "url": "https://meownowcompressed.s3.amazonaws.com/cat_1234567890.jpg",
     "filename": "cat_1234567890.jpg",
     "lastModified": "2025-03-15 12:34:56"
-  }
+  },
+  "api_version": "v1"
 }
 ```
 
 #### Get Image URL as Text
 
 ```bash
-curl https://api.meownow.app/?format=url
+curl https://api.meownow.app/api/v1/?format=url
 ```
 
 Response:
@@ -70,7 +71,7 @@ https://meownowcompressed.s3.amazonaws.com/cat_1234567890.jpg
 #### Download Image Directly
 
 ```bash
-curl -o cat.jpg https://api.meownow.app/?format=image
+curl -o cat.jpg https://api.meownow.app/api/v1/?format=image
 ```
 
 Response: The actual image file
@@ -78,7 +79,7 @@ Response: The actual image file
 #### Using in HTML
 
 ```html
-<img src="https://api.meownow.app/" alt="Random Cat">
+<img src="https://api.meownow.app/api/v1/" alt="Random Cat">
 ```
 
 Result: Displays a random cat image that changes on page refresh
@@ -86,7 +87,7 @@ Result: Displays a random cat image that changes on page refresh
 #### Using with JavaScript
 
 ```javascript
-fetch('https://api.meownow.app/?format=json')
+fetch('https://api.meownow.app/api/v1/?format=json')
   .then(response => response.json())
   .then(data => {
     if (data.success) {
