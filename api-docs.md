@@ -1,6 +1,7 @@
 # MeowNow API Documentation
 
 ## Random Cat Image API
+
 **Endpoint:** `https://meownow.app/api/v1/random`
 **Method:** GET
 
@@ -48,6 +49,7 @@ curl https://api.meownow.app/v1/random?format=json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -107,6 +109,7 @@ Please be respectful with your API usage. While we currently do not enforce stri
 ## Terms of Use
 
 By using the MeowNow API, you agree to:
+
 - Not use the API for any illegal purposes
 - Not attempt to overload or crash our servers
 - Provide attribution to MeowNow when using our images in your projects
