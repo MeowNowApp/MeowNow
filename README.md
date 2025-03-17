@@ -85,28 +85,31 @@ MeowNow works on all modern browsers including:
 
 ## API
 
-MeowNow provides a simple API for accessing random cat images programmatically. The API is available at `https://api.meownow.app/api/v1/`.
+The MeowNow API is available at `https://meownow.app/api/v1/random`. For detailed documentation, see:
+
+- [API Documentation (Web)](https://meownow.app/api-docs.html)
+- [API Documentation (Markdown)](api-docs.md)
 
 ### Basic Usage
 
 ```bash
 # Get a random cat image (redirects to the image URL)
-curl https://api.meownow.app/api/v1/
+curl https://api.meownow.app/v1/random
 
 # Get JSON metadata about a random cat image
-curl https://api.meownow.app/api/v1/?format=json
+curl https://api.meownow.app/v1/random?format=json
 
 # Get just the URL as plain text
-curl https://api.meownow.app/api/v1/?format=url
+curl https://api.meownow.app/v1/random?format=url
 
 # Download the image directly
-curl -o cat.jpg https://api.meownow.app/api/v1/?format=image
+curl -o cat.jpg https://api.meownow.app/v1/random?format=image
 ```
 
 ### Using in HTML
 
 ```html
-<img src="https://api.meownow.app/api/v1/" alt="Random Cat">
+<img src="https://api.meownow.app/v1/random" alt="Random Cat">
 ```
 
 For more details, see the [API Documentation](api-docs.html) or the [API Documentation (Markdown)](api-docs.md).

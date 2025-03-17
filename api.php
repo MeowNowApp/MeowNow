@@ -3,6 +3,6 @@
 // It will redirect requests to the appropriate API version
 
 // Redirect to the current API version
-header('Location: /api/v1/');
+header('Location: /v1/random');
 exit;
 ?> 

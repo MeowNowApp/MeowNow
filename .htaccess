@@ -40,4 +40,11 @@ AddDefaultCharset UTF-8
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
-</IfModule> 
+</IfModule>
+
+# Add these rules to your existing .htaccess
+RewriteEngine On
+RewriteBase /
+
+# Rewrite API endpoints
+RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L] 
