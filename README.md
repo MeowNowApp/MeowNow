@@ -85,7 +85,10 @@ MeowNow works on all modern browsers including:
 
 ## API
 
-MeowNow provides a simple API for accessing random cat images programmatically. The API is available at `https://api.meownow.app/v1/random`.
+The MeowNow API is available at `https://meownow.app/api/v1/random`. For detailed documentation, see:
+
+- [API Documentation (Web)](https://meownow.app/api-docs.html)
+- [API Documentation (Markdown)](api-docs.md)
 
 ### Basic Usage
 
