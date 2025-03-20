@@ -12,20 +12,43 @@ class ImageHandler {
     private $compressedBucket;
 
     public function __construct() {
-        $this->bucket = getenv('AWS_BUCKET_NAME');
-        $this->prefix = getenv('AWS_BUCKET_PREFIX');
-        $this->compressedBucket = getenv('AWS_BUCKET_COMPRESSED');
+        // Get required configuration with fallbacks
+        $this->bucket = getenv('AWS_BUCKET_NAME') 
+            ?: getenv('S3_RAW_BUCKET')
+            ?: getenv('AWS_BUCKET_RAW')
+            ?: 'meownowraw'; // Fallback to known bucket name
+            
+        if (!$this->bucket) {
+            throw new \Exception('AWS bucket name is not configured. Please set AWS_BUCKET_NAME, S3_RAW_BUCKET, or AWS_BUCKET_RAW environment variable.');
+        }
+
+        $this->prefix = trim(getenv('AWS_BUCKET_PREFIX') ?: getenv('S3_PREFIX') ?: '', '/');
+        $this->compressedBucket = getenv('S3_COMPRESSED_BUCKET') ?: 'meownowcompressed';
         
-        $this->s3Client = new S3Client([
+        // Get AWS credentials with consistent naming
+        $awsKey = getenv('AWS_ACCESS_KEY') ?: getenv('AWS_ACCESS_KEY_ID');
+        $awsSecret = getenv('AWS_SECRET_KEY') ?: getenv('AWS_SECRET_ACCESS_KEY');
+        
+        if (!$awsKey || !$awsSecret) {
+            throw new \Exception('AWS credentials are not configured. Please set AWS_ACCESS_KEY/AWS_ACCESS_KEY_ID and AWS_SECRET_KEY/AWS_SECRET_ACCESS_KEY environment variables.');
+        }
+        
+        $config = [
             'version' => 'latest',
-            'region'  => getenv('AWS_REGION'),
+            'region'  => getenv('AWS_REGION') ?: 'us-east-1',
             'credentials' => [
-                'key'    => getenv('AWS_ACCESS_KEY'),
-                'secret' => getenv('AWS_SECRET_KEY'),
-            ],
-            'endpoint' => getenv('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => true
-        ]);
+                'key'    => $awsKey,
+                'secret' => $awsSecret,
+            ]
+        ];
+
+        // Only add endpoint configuration if it's set
+        if ($endpoint = getenv('AWS_ENDPOINT')) {
+            $config['endpoint'] = $endpoint;
+            $config['use_path_style_endpoint'] = true;
+        }
+        
+        $this->s3Client = new S3Client($config);
     }
 
     public function getRandomImage($width = null, $height = null) {
@@ -64,14 +87,8 @@ class ImageHandler {
                 $bucket = $this->bucket;
             }
 
-            // Generate a presigned URL that expires in 1 hour
-            $command = $this->s3Client->getCommand('GetObject', [
-                'Bucket' => $bucket,
-                'Key'    => $key,
-                'Expires' => 3600 // 1 hour
-            ]);
-
-            $url = (string) $this->s3Client->createPresignedUrl($command, '+1 hour');
+            // Get the object URL
+            $url = $this->s3Client->getObjectUrl($bucket, $key);
 
             return [
                 'key' => $key,

@@ -1,40 +1,63 @@
 <?php
 
-require_once __DIR__ . '/../../../../vendor/autoload.php';
+require_once '/var/www/vendor/autoload.php';
 
 use MeowNow\Api\RandomCat;
 
-// Load environment variables
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../../../config');
-$dotenv->load();
+// Configure AWS
+$awsConfig = [
+    'version' => 'latest',
+    'region'  => $_ENV['AWS_REGION'] ?? 'us-east-1'
+];
 
-// Initialize the API
-$api = new RandomCat();
+// Add credentials
+if (!empty($_ENV['AWS_ACCESS_KEY_ID']) && !empty($_ENV['AWS_SECRET_ACCESS_KEY'])) {
+    $awsConfig['credentials'] = [
+        'key'    => $_ENV['AWS_ACCESS_KEY_ID'],
+        'secret' => $_ENV['AWS_SECRET_ACCESS_KEY']
+    ];
+}
 
-// Get the requested format
-$format = $_GET['format'] ?? 'redirect';
-
-// Handle the request
 try {
-    $result = $api->getRandomCat($format);
+    // Initialize the RandomCat API with AWS configuration
+    $api = new RandomCat($awsConfig);
     
-    if ($format === 'json') {
-        header('Content-Type: application/json');
-        echo json_encode($result);
-    } elseif ($format === 'url') {
-        header('Content-Type: text/plain');
-        echo $result;
+    // Get the requested format from query parameters
+    $format = $_GET['format'] ?? 'image';
+    
+    // Handle the request based on format
+    switch ($format) {
+        case 'json':
+            header('Content-Type: application/json');
+            echo json_encode($api->getRandomCat('json'));
+            break;
+            
+        case 'url':
+            header('Content-Type: text/plain');
+            echo $api->getRandomCat('url');
+            break;
+            
+        case 'image':
+        default:
+            // Redirect to the image URL
+            $imageData = $api->getRandomCat('url');
+            header('Location: ' . $imageData);
+            break;
     }
 } catch (Exception $e) {
-    if ($format === 'json') {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
-    } else {
-        header('HTTP/1.1 500 Internal Server Error');
-        echo 'Error: ' . $e->getMessage();
-    }
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'error' => true,
+        'message' => $e->getMessage(),
+        'config' => array_merge($awsConfig, ['credentials' => '***']),
+        'debug' => [
+            'env_vars' => [
+                'AWS_REGION' => $_ENV['AWS_REGION'] ?? 'not set',
+                'AWS_ACCESS_KEY_ID' => !empty($_ENV['AWS_ACCESS_KEY_ID']) ? 'set' : 'not set',
+                'AWS_SECRET_ACCESS_KEY' => !empty($_ENV['AWS_SECRET_ACCESS_KEY']) ? 'set' : 'not set'
+            ]
+        ]
+    ]);
 }
 ?> 

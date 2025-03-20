@@ -76,15 +76,32 @@ h1::after {
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
-    transition: all var(--transition-normal);
+    transition: all 0.2s ease-out;
     background: var(--gradient-card);
     white-space: nowrap;
+    position: relative;
+}
+
+.nav-item a::after {
+    content: "🐱";
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%) translateX(20px);
+    opacity: 0;
+    transition: all 0.2s ease-out;
 }
 
 .nav-item a:hover {
     color: white;
     background: var(--gradient-primary);
     transform: translateY(-1px);
+    padding-right: 2.2rem;
+}
+
+.nav-item a:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
 }
 
 /* Card styles */
@@ -107,8 +124,8 @@ h1::after {
     content: "🐾";
     position: absolute;
     font-size: 1.2rem;
-    opacity: 0.15;
-    transition: opacity var(--transition-normal);
+    opacity: 0;
+    transition: all 0.3s ease;
 }
 
 .card::before {
@@ -276,13 +293,19 @@ main {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 2.5rem;
-    opacity: 1;
-    animation: catBounce 1s infinite;
+    opacity: 0;
+    animation: fadeInCat 0.3s ease forwards, catBounce 1s infinite 0.3s;
 }
 
-@keyframes catBounce {
-    0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-    50% { transform: translate(-50%, -60%) rotate(10deg); }
+@keyframes fadeInCat {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 .cat-image {
@@ -382,8 +405,12 @@ footer a:hover {
         font-size: 1rem;
     }
     
-    .nav-item a:hover::after {
-        font-size: 0.8em;
+    .nav-item a:hover {
+        padding-right: 2rem;
+    }
+
+    .nav-item a::after {
+        font-size: 0.9rem;
     }
 }
 
@@ -440,7 +467,7 @@ footer a:hover {
     left: var(--spacing-lg);
     opacity: 0;
     transform: translateX(-10px);
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
 }
 
 .button:hover {
@@ -461,24 +488,4 @@ footer a:hover {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-}
-
-/* Nav hover effect */
-.nav-item a:hover::after {
-    content: "🐱";
-    margin-left: 0.4rem;
-    font-size: 0.9em;
-    display: inline-block;
-}
-
-.nav-item a:hover::after {
-    animation: wiggle 1s ease;
-}
-
-@keyframes wiggle {
-    0% { transform: rotate(0deg) translateY(0); }
-    25% { transform: rotate(-15deg) translateY(-2px); }
-    50% { transform: rotate(0deg) translateY(0); }
-    75% { transform: rotate(15deg) translateY(-2px); }
-    100% { transform: rotate(0deg) translateY(0); }
 }
