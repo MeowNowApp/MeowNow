@@ -14,6 +14,117 @@ A simple and elegant web application for displaying and sharing random cat image
 - **Cloud Storage**: Uses AWS S3 for reliable, scalable image storage
 - **Public API**: Access random cat images programmatically via API
 
+## Project Structure
+
+```
+meownow/
+├── config/           # Configuration files
+│   ├── .env         # Environment variables (not in repo)
+│   └── config.php   # PHP configuration
+├── docker/          # Docker configuration
+│   ├── config/      # Docker-specific config
+│   ├── scripts/     # Docker scripts
+│   └── Dockerfile   # Main Dockerfile
+├── docs/           # Documentation
+│   ├── api-docs.md
+│   ├── privacypolicy.md
+│   └── LICENSE
+├── public/         # Public web root
+│   ├── api/       # API endpoints
+│   ├── css/       # Stylesheets
+│   ├── js/        # JavaScript files
+│   └── images/    # Static images
+├── src/           # Source code
+│   ├── api/       # API implementation
+│   └── utils/     # Utility functions
+└── vendor/        # Composer dependencies
+```
+
+## Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/meownow.git
+   cd meownow
+   ```
+
+2. Copy the environment file:
+   ```bash
+   cp config/.env.example config/.env
+   ```
+
+3. Edit `config/.env` with your AWS credentials and configuration.
+
+4. Install dependencies:
+   ```bash
+   composer install
+   ```
+
+5. Build and start Docker container:
+   ```bash
+   docker-compose up -d
+   ```
+
+6. Access the website at http://localhost:8080
+
+## API Documentation
+
+The API documentation is available at:
+- [Web Version](http://localhost:8080/api-docs.html)
+- [Markdown Version](docs/api-docs.md)
+
+### Basic Usage
+
+```bash
+# Get a random cat image (redirects to the image URL)
+curl https://meownow.app/api/v1/random
+
+# Get JSON metadata about a random cat image
+curl https://meownow.app/api/v1/random?format=json
+
+# Get just the URL as plain text
+curl https://meownow.app/api/v1/random?format=url
+
+# Download the image directly
+curl -o cat.jpg https://meownow.app/api/v1/random?format=image
+```
+
+### Using in HTML
+
+```html
+<img src="https://meownow.app/api/v1/random" alt="Random Cat">
+```
+
+## Development
+
+### Prerequisites
+
+- PHP 8.0 or higher
+- Composer
+- Docker and Docker Compose
+- AWS account with S3 access
+
+### Local Development
+
+1. Clone the repository
+2. Copy and configure `.env`
+3. Install dependencies
+4. Run `docker-compose up -d`
+
+### Testing
+
+```bash
+composer test
+```
+
+## License
+
+See [LICENSE](docs/LICENSE) for details.
+
+## Credits
+
+Created by [wbreiler.com](https://wbreiler.com)
+
 ## AWS Architecture
 
 ### S3 Storage
@@ -83,60 +194,49 @@ MeowNow works on all modern browsers including:
   - Reduced load on the web server by offloading image processing
   - Automatic scaling to handle traffic spikes
 
-## API
-
-The MeowNow API is available at `https://meownow.app/api/v1/random`. For detailed documentation, see:
-
-- [API Documentation (Web)](https://meownow.app/api-docs.html)
-- [API Documentation (Markdown)](api-docs.md)
-
-### Basic Usage
-
-```bash
-# Get a random cat image (redirects to the image URL)
-curl https://api.meownow.app/v1/random
-
-# Get JSON metadata about a random cat image
-curl https://api.meownow.app/v1/random?format=json
-
-# Get just the URL as plain text
-curl https://api.meownow.app/v1/random?format=url
-
-# Download the image directly
-curl -o cat.jpg https://api.meownow.app/v1/random?format=image
-```
-
-### Using in HTML
-
-```html
-<img src="https://api.meownow.app/v1/random" alt="Random Cat">
-```
-
-For more details, see the [API Documentation](api-docs.html) or the [API Documentation (Markdown)](api-docs.md).
-
 ## Privacy Policy
 
 We take user privacy seriously. Please review our [Privacy Policy](privacypolicy.md) for details on how we handle user data.
 
-## License
+## Docker Setup
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project includes a Docker setup for easy deployment and development.
 
-This means you are free to:
+### Prerequisites
 
-- Use this software for commercial purposes
-- Modify the software
-- Distribute the software
-- Sublicense the software
-- Use the software privately
+- Docker
+- Docker Compose
 
-Under the following conditions:
+### Quick Start
 
-- You must include the original copyright notice
-- You must include the license notice
-- For significant modifications, you must state that you changed the files
-- If you include a NOTICE file, you must include it in any redistributions
+1. Copy the example environment file:
+   ```bash
+   cp docker/config/.env.example .env
+   ```
 
-## Credits
+2. Edit the `.env` file with your AWS credentials and configuration.
 
-Created by [wbreiler.com](https://wbreiler.com)
+3. Build and start the container:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Access the website at http://localhost:8080
+
+### Configuration
+
+All Docker-related files are stored in the `./docker` directory:
+- `docker/Dockerfile`: Main Docker configuration
+- `docker/entrypoint.sh`: Container startup script
+- `docker/config/.env.example`: Example environment variables
+
+### Development
+
+For development, you can uncomment the volume mounts in `docker-compose.yml` to override files in the container with your local files:
+
+```yaml
+volumes:
+  - ./css:/var/www/html/css
+  - ./js:/var/www/html/js
+  - ./api:/var/www/html/api
+```

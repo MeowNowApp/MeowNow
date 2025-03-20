@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    
+    <title>MeowNow - Random Cat Images</title>
+    <meta name="description" content="View random cat images from our collection">
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MeowNow</h1>
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="/">Home</a></li>
+                    <li class="nav-item"><a href="/api-docs.html">API</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div id="cat-container" class="cat-image-container">
+                    <img id="cat-image" class="cat-image" src="" alt="Random cat image will appear here" style="display: none;">
+                    <div id="image-info" class="image-info">Loading a random cat...</div>
+                </div>
+                <button id="refresh-button" class="button">Get Random Cat</button>
+            </div>
+        </main>
+    </div>
+    
+    <script src="./js/script.js"></script>
+</body>
+</html>

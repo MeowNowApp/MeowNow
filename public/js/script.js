@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Add loading class to container when image is loading
     catImage.addEventListener("load", function() {
         catContainer.classList.remove("loading");
+        catImage.style.display = "block"; // Show the image once loaded
         console.log("Image loaded successfully:", catImage.src);
     });
     
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Show loading state
         catContainer.classList.add("loading");
         catImage.style.opacity = "0";
+        catImage.style.display = "none"; // Hide while loading
         imageInfo.textContent = "Loading a random cat...";
         
         try {
@@ -48,10 +50,11 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Cats available:", cats.length);
             
             if (!cats || cats.length === 0) {
-                catImage.src = "no-cats.jpg";
+                catImage.src = "images/no-cats.jpg";
                 catImage.alt = "No cat images available";
+                catImage.style.display = "block";
                 catImage.style.opacity = "1";
-                imageInfo.textContent = "No cat images found in the gallery.";
+                imageInfo.textContent = "";
                 return;
             }
             
@@ -60,65 +63,33 @@ document.addEventListener("DOMContentLoaded", function() {
             const randomCat = cats[randomIndex];
             console.log("Selected cat:", randomCat);
             
-            // Check if the cat is a full URL or just a filename or object
-            let imageUrl;
-            if (typeof randomCat === 'string') {
-                // It's a string (backward compatibility)
-                if (randomCat.startsWith('http')) {
-                    // It's already a full URL
-                    imageUrl = randomCat;
-                } else {
-                    // It's just a filename, use the URL from the server response
-                    imageUrl = `cats/${randomCat}`;
-                }
-            } else if (randomCat.url) {
-                // It's an object with a URL property
-                imageUrl = randomCat.url;
-            } else if (randomCat.key) {
-                // It's an object with a key property
-                imageUrl = `https://${randomCat.bucket || 's3.amazonaws.com'}/${randomCat.key}`;
-            }
-            
+            // Use the URL from our proxy endpoint
+            const imageUrl = randomCat.url;
             console.log("Loading image from URL:", imageUrl);
             
             // Set the image source
             catImage.src = imageUrl;
             catImage.alt = "A random cat";
+            catImage.style.display = "block"; // Ensure image is visible
             catImage.style.opacity = "1";
             
-            // Update image info
-            imageInfo.textContent = typeof randomCat === 'string' ? randomCat : (randomCat.filename || '');
+            // Clear the image info text
+            imageInfo.textContent = "";
             
             // Preload the next image for faster experience
             if (cats.length > 1) {
                 const nextIndex = (randomIndex + 1) % cats.length;
                 const nextCat = cats[nextIndex];
                 const preloadImage = new Image();
-                
-                // Determine the URL for the next image
-                let nextImageUrl;
-                if (typeof nextCat === 'string') {
-                    if (nextCat.startsWith('http')) {
-                        nextImageUrl = nextCat;
-                    } else {
-                        nextImageUrl = `cats/${nextCat}`;
-                    }
-                } else if (nextCat.url) {
-                    nextImageUrl = nextCat.url;
-                } else if (nextCat.key) {
-                    nextImageUrl = `https://${nextCat.bucket || 's3.amazonaws.com'}/${nextCat.key}`;
-                }
-                
-                if (nextImageUrl) {
-                    preloadImage.src = nextImageUrl;
-                }
+                preloadImage.src = nextCat.url;
             }
         } catch (error) {
             console.error("Error displaying random cat:", error);
-            catImage.src = "error.jpg";
+            catImage.src = "images/error.jpg";
             catImage.alt = "Error loading cat image";
+            catImage.style.display = "block";
             catImage.style.opacity = "1";
-            imageInfo.textContent = "Error loading image. Please try again.";
+            imageInfo.textContent = "";
         }
     }
     

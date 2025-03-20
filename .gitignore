@@ -1,5 +1,42 @@
-# Environment variables
+# Environment files
 .env
+.env.*
+!.env.example
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Dependencies
+vendor/
+node_modules/
+
+# Build files
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Docker
+docker-compose.override.yml
+
+# Local development
+*.local
+composer.lock
 
 # Composer dependencies
 ./vendor/

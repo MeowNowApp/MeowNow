@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <title>MeowNow API Documentation</title>
+    <meta name="description" content="Documentation for the MeowNow Random Cat Image API">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MeowNow API</h1>
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="./">Home</a></li>
+                    <li class="nav-item"><a href="./api-docs.html">API</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="card">
+                <h2>Random Cat Image API</h2>
+                <p><strong>Endpoint:</strong> <code>https://meownow.app/api/v1/random</code></p>
+                <p><strong>Method:</strong> GET</p>
+                
+                <h3>Parameters</h3>
+                <table class="api-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>format</td>
+                            <td>string</td>
+                            <td>Response format: "json", "url", or "image" (default: redirects to image)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Example Usage</h3>
+                <div class="code-block">
+                    <pre><code>// Get a random cat image (redirects to the image URL)
+curl https://meownow.app/api/v1/random
+
+// Get JSON metadata about a random cat image
+curl https://meownow.app/api/v1/random?format=json
+
+// Get just the URL as plain text
+curl https://meownow.app/api/v1/random?format=url
+
+// Download the image directly
+curl -o cat.jpg https://meownow.app/api/v1/random?format=image</code></pre>
+                </div>
+                
+                <h3>Response Examples</h3>
+                <h4>JSON Response</h4>
+                <div class="code-block">
+                    <pre><code>{
+  "url": "https://meownow.app/images/cat1234.jpg",
+  "id": "cat1234",
+  "width": 800,
+  "height": 600,
+  "format": "jpg"
+}</code></pre>
+                </div>
+                
+                <a href="./" class="button">Back to Home</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html> 

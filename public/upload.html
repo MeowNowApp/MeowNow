@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <title>MeowNow - Upload Cat Images</title>
+    <meta name="description" content="Upload your cat images to the MeowNow collection">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MeowNow</h1>
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="./">Home</a></li>
+                    <li class="nav-item"><a href="./api-docs.html">API</a></li>
+                    <li class="nav-item"><a href="./upload.html">Upload</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <div class="card">
+                <h2>Upload Cat Image</h2>
+                <p>Share your cat photos with the MeowNow community!</p>
+                
+                <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="imageFile">Select Image:</label>
+                        <input type="file" id="imageFile" name="image" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="button">Upload Image</button>
+                    </div>
+                </form>
+                
+                <div id="uploadStatus" class="upload-status"></div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="./js/upload.js"></script>
+</body>
+</html> 

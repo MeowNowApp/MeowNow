@@ -1,13 +1,15 @@
-# Protect sensitive files
-<FilesMatch "^\.env">
+# Deny access to sensitive files
+<FilesMatch "^(\.env|config\.php|composer\.(json|lock))$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-<FilesMatch "^composer\.(json|lock)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
+# Protect dot files and directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known
+    RewriteRule (^|/)\.(?!well-known) - [F]
+</IfModule>
 
 # Protect the logs directory
 <FilesMatch "^\.log$">
@@ -47,4 +49,7 @@ RewriteEngine On
 RewriteBase /
 
 # Rewrite API endpoints
-RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L] 
+RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L]
+
+# Add this to your .htaccess file
+AddType text/css .css 
