@@ -5,11 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <link rel="stylesheet" href="./css/style.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/responsive.css">
     
     <title>MeowNow API Documentation</title>
     <meta name="description" content="Documentation for the MeowNow Random Cat Image API">
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <style>
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-md) 0;
+            background: var(--background-secondary);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .api-table th, .api-table td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .api-table th {
+            background: var(--gradient-card);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .api-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .api-table tr:hover td {
+            background: var(--background-hover);
+        }
+
+        .code-block {
+            background: var(--gradient-card);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block::before {
+            content: "💻";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 1rem;
+            opacity: 0.5;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding-right: var(--spacing-xl);
+        }
+
+        .code-block code {
+            font-family: 'Fira Code', monospace;
+            color: var(--text-primary);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: var(--spacing-lg) 0 var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: var(--spacing-md) 0;
+            color: var(--text-primary);
+        }
+
+        code {
+            background: var(--background-secondary);
+            padding: 0.2em 0.4em;
+            border-radius: var(--radius-sm);
+            font-size: 0.9em;
+            color: var(--primary-color);
+        }
+
+        .endpoint-url {
+            display: inline-block;
+            padding: var(--spacing-md);
+            background: var(--gradient-card);
+            border-radius: var(--radius-md);
+            margin: var(--spacing-sm) 0;
+            font-family: 'Fira Code', monospace;
+            position: relative;
+        }
+
+        .endpoint-url::before {
+            content: "🔗";
+            margin-right: var(--spacing-sm);
+        }
+
+        .method-tag {
+            display: inline-block;
+            padding: 0.2em 0.6em;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            margin-right: var(--spacing-sm);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -17,8 +137,9 @@
             <h1>MeowNow API</h1>
             <nav>
                 <ul class="nav-list">
-                    <li class="nav-item"><a href="./">Home</a></li>
-                    <li class="nav-item"><a href="./api-docs.html">API</a></li>
+                    <li class="nav-item"><a href="/">Home</a></li>
+                    <li class="nav-item"><a href="/api-docs.html">API</a></li>
+                    <li class="nav-item"><a href="/upload.html">Upload</a></li>
                 </ul>
             </nav>
         </header>
@@ -26,8 +147,9 @@
         <main>
             <div class="card">
                 <h2>Random Cat Image API</h2>
-                <p><strong>Endpoint:</strong> <code>https://meownow.app/api/v1/random</code></p>
-                <p><strong>Method:</strong> GET</p>
+                <p><strong>Endpoint:</strong></p>
+                <div class="endpoint-url">https://meownow.app/api/v1/random</div>
+                <p><span class="method-tag">GET</span></p>
                 
                 <h3>Parameters</h3>
                 <table class="api-table">
@@ -74,7 +196,7 @@ curl -o cat.jpg https://meownow.app/api/v1/random?format=image</code></pre>
 }</code></pre>
                 </div>
                 
-                <a href="./" class="button">Back to Home</a>
+                <a href="/" class="button">Back to Home</a>
             </div>
         </main>
     </div>
