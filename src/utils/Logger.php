@@ -51,10 +51,10 @@ class Logger {
         );
     }
 
-    public function logUpload($file, $success, $message = '') {
+    public function logUpload(array $file, bool $success, string $message = ''): void {
         // Get IP address and mask last two octets
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $maskedIp = preg_replace('/\.\d+\.\d+$/', '.xxx.xxx', $ip);
+        $maskedIp = $this->maskIpAddress($ip);
 
         // Get upload details
         $filename = $file['name'] ?? 'unknown';
@@ -81,7 +81,7 @@ class Logger {
         file_put_contents($this->uploadLogFile, $logEntry, FILE_APPEND);
     }
 
-    private function formatFileSize($bytes) {
+    private function formatFileSize(int $bytes): string {
         if ($bytes >= 1073741824) {
             return number_format($bytes / 1073741824, 2) . ' GB';
         } elseif ($bytes >= 1048576) {

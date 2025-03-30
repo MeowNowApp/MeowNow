@@ -6,52 +6,22 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 
 class ImageHandler {
-    private $s3Client;
-    private $bucket;
-    private $prefix;
-    private $compressedBucket;
+    use AwsConfigTrait;
+
+    private S3Client $s3Client;
+    private string $bucket;
+    private string $prefix;
+    private string $compressedBucket;
 
     public function __construct() {
-        // Get required configuration with fallbacks
-        $this->bucket = getenv('AWS_BUCKET_NAME') 
-            ?: getenv('S3_RAW_BUCKET')
-            ?: getenv('AWS_BUCKET_RAW')
-            ?: 'meownowraw'; // Fallback to known bucket name
-            
-        if (!$this->bucket) {
-            throw new \Exception('AWS bucket name is not configured. Please set AWS_BUCKET_NAME, S3_RAW_BUCKET, or AWS_BUCKET_RAW environment variable.');
-        }
-
-        $this->prefix = trim(getenv('AWS_BUCKET_PREFIX') ?: getenv('S3_PREFIX') ?: '', '/');
+        $this->bucket = $this->getBucketName();
+        $this->prefix = $this->getBucketPrefix();
         $this->compressedBucket = getenv('S3_COMPRESSED_BUCKET') ?: 'meownowcompressed';
         
-        // Get AWS credentials with consistent naming
-        $awsKey = getenv('AWS_ACCESS_KEY') ?: getenv('AWS_ACCESS_KEY_ID');
-        $awsSecret = getenv('AWS_SECRET_KEY') ?: getenv('AWS_SECRET_ACCESS_KEY');
-        
-        if (!$awsKey || !$awsSecret) {
-            throw new \Exception('AWS credentials are not configured. Please set AWS_ACCESS_KEY/AWS_ACCESS_KEY_ID and AWS_SECRET_KEY/AWS_SECRET_ACCESS_KEY environment variables.');
-        }
-        
-        $config = [
-            'version' => 'latest',
-            'region'  => getenv('AWS_REGION') ?: 'us-east-1',
-            'credentials' => [
-                'key'    => $awsKey,
-                'secret' => $awsSecret,
-            ]
-        ];
-
-        // Only add endpoint configuration if it's set
-        if ($endpoint = getenv('AWS_ENDPOINT')) {
-            $config['endpoint'] = $endpoint;
-            $config['use_path_style_endpoint'] = true;
-        }
-        
-        $this->s3Client = new S3Client($config);
+        $this->s3Client = new S3Client($this->getAwsConfig());
     }
 
-    public function getRandomImage($width = null, $height = null) {
+    public function getRandomImage(?int $width = null, ?int $height = null): array {
         try {
             // List objects in the bucket
             $result = $this->s3Client->listObjects([
@@ -105,7 +75,7 @@ class ImageHandler {
         }
     }
 
-    private function getCompressedImageKey($originalKey, $width, $height) {
+    private function getCompressedImageKey(string $originalKey, ?int $width, ?int $height): ?string {
         // Check if a compressed version exists
         $compressedKey = $this->generateCompressedKey($originalKey, $width, $height);
         
@@ -120,7 +90,7 @@ class ImageHandler {
         }
     }
 
-    private function generateCompressedKey($originalKey, $width, $height) {
+    private function generateCompressedKey(string $originalKey, ?int $width, ?int $height): string {
         $info = pathinfo($originalKey);
         $dimensions = '';
         if ($width) $dimensions .= "w{$width}";
