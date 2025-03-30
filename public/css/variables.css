@@ -29,7 +29,8 @@
         rgba(255, 255, 255, 0.95) 0%,
         rgba(255, 255, 255, 0.85) 100%
     );
-    --gradient-button-hover: linear-gradient(135deg, #FF7B7B 0%, #FF5252 100%);
+    --gradient-button-hover: linear-gradient(135deg, #D64545 0%, #B83232 100%);
+    --gradient-nav-hover: linear-gradient(135deg, #FFE3E3 0%, #FFD1D1 100%);
     
     /* Spacing */
     --spacing-xs: 0.25rem;

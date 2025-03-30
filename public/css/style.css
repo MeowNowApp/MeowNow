@@ -93,8 +93,8 @@ h1::after {
 }
 
 .nav-item a:hover {
-    color: white;
-    background: var(--gradient-primary);
+    color: var(--text-primary);
+    background: var(--gradient-nav-hover);
     transform: translateY(-1px);
     padding-right: 2.2rem;
 }
@@ -116,33 +116,6 @@ h1::after {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-}
-
-/* Paw prints in corners */
-.card::before,
-.card::after {
-    content: "🐾";
-    position: absolute;
-    font-size: 1.2rem;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.card::before {
-    top: 0.8rem;
-    right: 0.8rem;
-    transform: rotate(-15deg);
-}
-
-.card::after {
-    bottom: 0.8rem;
-    left: 0.8rem;
-    transform: rotate(15deg);
-}
-
-.card:hover::before,
-.card:hover::after {
-    opacity: 0.3;
 }
 
 .card:hover {
@@ -474,7 +447,8 @@ footer a:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
     padding-left: calc(var(--spacing-xl) + 1.5rem);
-    background: var(--gradient-button-hover);
+    background: var(--gradient-nav-hover);
+    color: var(--text-primary);
 }
 
 .button:hover::before {

@@ -6,38 +6,41 @@ ini_set('display_errors', 1); // Enable error display for debugging
 // Prevent any output before headers
 ob_start();
 
-// Set content type to JSON and CORS headers
+// Set headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Load AWS SDK
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// AWS S3 Configuration
-$awsRegion = getenv('AWS_REGION') ?: 'us-east-1';
-$s3CompressedBucket = getenv('S3_COMPRESSED_BUCKET') ?: 'meownowcompressed';
-$awsAccessKey = getenv('AWS_ACCESS_KEY_ID');
-$awsSecretKey = getenv('AWS_SECRET_ACCESS_KEY');
+// Load configuration
+$config = [
+    'region' => getenv('AWS_REGION') ?: 'us-east-1',
+    'bucket' => getenv('S3_COMPRESSED_BUCKET') ?: 'meownowcompressed',
+    'accessKey' => getenv('AWS_ACCESS_KEY_ID'),
+    'secretKey' => getenv('AWS_SECRET_ACCESS_KEY'),
+    'cacheFile' => __DIR__ . '/../logs/cat_list.json',
+    'cacheExpiry' => 3600 // 1 hour
+];
 
-// Debug AWS configuration
-error_log("AWS Configuration:");
-error_log("Region: " . $awsRegion);
-error_log("Bucket: " . $s3CompressedBucket);
-error_log("Access Key length: " . (strlen($awsAccessKey) ?: 0));
-error_log("Secret Key length: " . (strlen($awsSecretKey) ?: 0));
-
-// Validate AWS credentials
-if (empty($awsAccessKey) || empty($awsSecretKey)) {
-    error_log("AWS credentials are missing or empty");
+// Validate configuration
+if (empty($config['accessKey']) || empty($config['secretKey'])) {
+    error_log("AWS credentials are missing");
     echo json_encode([]);
     exit;
 }
 
+// Debug AWS configuration
+error_log("AWS Configuration:");
+error_log("Region: " . $config['region']);
+error_log("Bucket: " . $config['bucket']);
+error_log("Access Key length: " . (strlen($config['accessKey']) ?: 0));
+error_log("Secret Key length: " . (strlen($config['secretKey']) ?: 0));
+
 // Local file that stores the list of uploaded images (cache and fallback)
-$catListFile = __DIR__ . '/../logs/cat_list.json';
-$cacheExpiryTime = 3600; // Cache expiry time in seconds (1 hour)
+$catListFile = $config['cacheFile'];
+$cacheExpiryTime = $config['cacheExpiry']; // Cache expiry time in seconds (1 hour)
 
 // Create logs directory if it doesn't exist
 $logsDir = dirname($catListFile);
@@ -55,26 +58,26 @@ if (!file_exists($logsDir)) {
 
 // Function to get cat images from S3 compressed bucket
 function getCatsFromS3() {
-    global $awsRegion, $s3CompressedBucket, $awsAccessKey, $awsSecretKey;
+    global $config;
     
     try {
         // Create an S3 client with credentials from environment variables
         $s3 = new Aws\S3\S3Client([
             'version' => 'latest',
-            'region'  => $awsRegion,
+            'region'  => $config['region'],
             'credentials' => [
-                'key'    => $awsAccessKey,
-                'secret' => $awsSecretKey,
+                'key'    => $config['accessKey'],
+                'secret' => $config['secretKey'],
             ],
             'debug' => true // Enable debug mode
         ]);
         
         // Log bucket access attempt
-        error_log("Attempting to list objects in bucket: " . $s3CompressedBucket);
+        error_log("Attempting to list objects in bucket: " . $config['bucket']);
         
         // List all objects in the compressed bucket
         $result = $s3->listObjects([
-            'Bucket' => $s3CompressedBucket
+            'Bucket' => $config['bucket']
         ]);
         
         $cats = [];
