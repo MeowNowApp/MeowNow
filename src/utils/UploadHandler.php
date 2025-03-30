@@ -114,12 +114,16 @@ class UploadHandler {
             ]);
 
             $images = [];
-            foreach ($result->get('Contents') as $object) {
-                $images[] = [
-                    'key' => $object['Key'],
-                    'url' => $this->s3Client->getObjectUrl($this->bucket, $object['Key']),
-                    'lastModified' => $object['LastModified']->format('Y-m-d H:i:s')
-                ];
+            $contents = $result->get('Contents');
+            
+            if ($contents) {
+                foreach ($contents as $object) {
+                    $images[] = [
+                        'key' => $object['Key'],
+                        'url' => $this->s3Client->getObjectUrl($this->bucket, $object['Key']),
+                        'lastModified' => $object['LastModified']->format('Y-m-d H:i:s')
+                    ];
+                }
             }
             return $images;
         } catch (\Exception $e) {
