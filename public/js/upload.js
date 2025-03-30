@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
 
-            elements.status.textContent = 'Upload successful! Your cat image has been added to the collection.';
+            elements.status.textContent = 'Upload successful! Your cat image is pending review and will be visible once approved.';
             elements.status.className = 'upload-status success';
             elements.form.reset();
             elements.fileName.textContent = '';

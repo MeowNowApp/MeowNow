@@ -14,6 +14,8 @@ class UploadHandler {
     private Logger $logger;
     private int $maxFileSize;
     private array $allowedTypes;
+    private string $pendingPrefix;
+    private string $approvedPrefix;
 
     public function __construct(Logger $logger) {
         $this->bucket = $this->getBucketName();
@@ -21,6 +23,8 @@ class UploadHandler {
         $this->logger = $logger;
         $this->maxFileSize = (int)(getenv('MAX_UPLOAD_SIZE') ?: 10 * 1024 * 1024); // 10MB default
         $this->allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $this->pendingPrefix = 'pending/';
+        $this->approvedPrefix = 'approved/';
         
         $this->s3Client = new S3Client($this->getAwsConfig());
     }
@@ -34,11 +38,11 @@ class UploadHandler {
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = uniqid('cat_') . '.' . $extension;
             
-            // Construct the key with proper prefix handling
-            $key = $this->prefix ? $this->prefix . '/' . $filename : $filename;
+            // Construct the key with pending prefix
+            $key = $this->pendingPrefix . $filename;
 
-            // Upload to S3
-            $result = $this->s3Client->putObject([
+            // Upload to S3 pending folder
+            $this->s3Client->putObject([
                 'Bucket' => $this->bucket,
                 'Key'    => $key,
                 'Body'   => fopen($file['tmp_name'], 'rb'),
@@ -50,13 +54,76 @@ class UploadHandler {
 
             return [
                 'success' => true,
-                'url' => $result['ObjectURL'],
+                'message' => 'Image uploaded successfully and pending review',
                 'key' => $key
             ];
         } catch (\Exception $e) {
             // Log failed upload
             $this->logger->logUpload($file, false, $e->getMessage());
             throw $e;
+        }
+    }
+
+    public function approveImage(string $key): array {
+        try {
+            // Get the filename without the pending prefix
+            $filename = basename($key);
+            $newKey = $this->approvedPrefix . $filename;
+
+            // Copy from pending to approved
+            $this->s3Client->copyObject([
+                'Bucket' => $this->bucket,
+                'CopySource' => $this->bucket . '/' . $key,
+                'Key' => $newKey
+            ]);
+
+            // Delete from pending
+            $this->s3Client->deleteObject([
+                'Bucket' => $this->bucket,
+                'Key' => $key
+            ]);
+
+            return [
+                'success' => true,
+                'url' => $this->s3Client->getObjectUrl($this->bucket, $newKey),
+                'key' => $newKey
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to approve image: ' . $e->getMessage());
+        }
+    }
+
+    public function rejectImage(string $key): bool {
+        try {
+            // Delete from pending
+            $this->s3Client->deleteObject([
+                'Bucket' => $this->bucket,
+                'Key' => $key
+            ]);
+            return true;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to reject image: ' . $e->getMessage());
+        }
+    }
+
+    public function getPendingImages(): array {
+        try {
+            $result = $this->s3Client->listObjects([
+                'Bucket' => $this->bucket,
+                'Prefix' => $this->pendingPrefix
+            ]);
+
+            $images = [];
+            foreach ($result->get('Contents') as $object) {
+                $images[] = [
+                    'key' => $object['Key'],
+                    'url' => $this->s3Client->getObjectUrl($this->bucket, $object['Key']),
+                    'lastModified' => $object['LastModified']->format('Y-m-d H:i:s')
+                ];
+            }
+            return $images;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to get pending images: ' . $e->getMessage());
         }
     }
 
