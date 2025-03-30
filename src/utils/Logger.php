@@ -8,7 +8,7 @@ class Logger {
     private string $uploadLogFile;
 
     public function __construct() {
-        $this->logDir = LOG_DIRECTORY;
+        $this->logDir = getenv('LOG_DIRECTORY') ?: __DIR__ . '/../../logs';
         $this->apiLogFile = $this->logDir . '/api.log';
         $this->uploadLogFile = $this->logDir . '/uploads.log';
         
