@@ -16,6 +16,7 @@ class UploadHandler {
     private array $allowedTypes;
     private string $pendingPrefix;
     private string $approvedPrefix;
+    private string $compressedBucket;
 
     public function __construct(Logger $logger) {
         $this->bucket = $this->getBucketName();
@@ -25,6 +26,7 @@ class UploadHandler {
         $this->allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $this->pendingPrefix = 'pending/';
         $this->approvedPrefix = 'approved/';
+        $this->compressedBucket = getenv('S3_COMPRESSED_BUCKET') ?: getenv('AWS_BUCKET_COMPRESSED') ?: $this->bucket;
         
         $this->s3Client = new S3Client($this->getAwsConfig());
     }
@@ -43,7 +45,7 @@ class UploadHandler {
 
             // Upload to S3 pending folder
             $this->s3Client->putObject([
-                'Bucket' => $this->bucket,
+                'Bucket' => $this->compressedBucket,
                 'Key'    => $key,
                 'Body'   => fopen($file['tmp_name'], 'rb'),
                 'ContentType' => $file['type']
@@ -72,20 +74,20 @@ class UploadHandler {
 
             // Copy from pending to approved
             $this->s3Client->copyObject([
-                'Bucket' => $this->bucket,
-                'CopySource' => $this->bucket . '/' . $key,
+                'Bucket' => $this->compressedBucket,
+                'CopySource' => $this->compressedBucket . '/' . $key,
                 'Key' => $newKey
             ]);
 
             // Delete from pending
             $this->s3Client->deleteObject([
-                'Bucket' => $this->bucket,
+                'Bucket' => $this->compressedBucket,
                 'Key' => $key
             ]);
 
             return [
                 'success' => true,
-                'url' => $this->s3Client->getObjectUrl($this->bucket, $newKey),
+                'url' => $this->s3Client->getObjectUrl($this->compressedBucket, $newKey),
                 'key' => $newKey
             ];
         } catch (\Exception $e) {
@@ -97,7 +99,7 @@ class UploadHandler {
         try {
             // Delete from pending
             $this->s3Client->deleteObject([
-                'Bucket' => $this->bucket,
+                'Bucket' => $this->compressedBucket,
                 'Key' => $key
             ]);
             return true;
@@ -108,9 +110,12 @@ class UploadHandler {
 
     public function getPendingImages(): array {
         try {
+            // Temporarily use compressed bucket for testing
+            $compressedBucket = getenv('S3_COMPRESSED_BUCKET') ?: getenv('AWS_BUCKET_COMPRESSED') ?: $this->bucket;
+            
             $result = $this->s3Client->listObjects([
-                'Bucket' => $this->bucket,
-                'Prefix' => $this->pendingPrefix
+                'Bucket' => $compressedBucket,
+                'Prefix' => '' // List all images for testing
             ]);
 
             $images = [];
@@ -118,16 +123,21 @@ class UploadHandler {
             
             if ($contents) {
                 foreach ($contents as $object) {
+                    // Skip any potential folders
+                    if (substr($object['Key'], -1) === '/') {
+                        continue;
+                    }
+                    
                     $images[] = [
                         'key' => $object['Key'],
-                        'url' => $this->s3Client->getObjectUrl($this->bucket, $object['Key']),
+                        'url' => $this->s3Client->getObjectUrl($compressedBucket, $object['Key']),
                         'lastModified' => $object['LastModified']->format('Y-m-d H:i:s')
                     ];
                 }
             }
             return $images;
         } catch (\Exception $e) {
-            throw new \Exception('Failed to get pending images: ' . $e->getMessage());
+            throw new \Exception('Failed to get images: ' . $e->getMessage());
         }
     }
 
