@@ -54,3 +54,6 @@ composer.lock
 composer.lock
 cats/
 compress.php
+
+# SQLite database
+data/users.db

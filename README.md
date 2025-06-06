@@ -1,5 +1,8 @@
 # MeowNow 😸
 
+> [! Caution]
+> As of June 1, 2025, MeowNow has ceased development. I, personally, assume this to be temporary but will update this section if necessary.
+
 A simple and elegant web application for displaying and sharing random cat images using AWS S3 for storage.
 
 ## Features

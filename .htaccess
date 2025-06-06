@@ -1,14 +1,26 @@
-# Deny access to sensitive files
+# Deny access to sensitive files and directories
 <FilesMatch "^(\.env|config\.php|composer\.(json|lock))$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Protect dot files and directories
+# Block access to sensitive directories
+<DirectoryMatch "^/(src|config|vendor|logs|data)/">
+    Require all denied
+</DirectoryMatch>
+
+# Additional protection using mod_rewrite
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
+    
+    # Block access to sensitive directories
+    RewriteCond %{REQUEST_URI} ^/(src|config|vendor|logs|data)/ [NC]
+    RewriteRule .* - [F,L]
+    
+    # Protect dot files and directories
     RewriteCond %{REQUEST_URI} !^/\.well-known
-    RewriteRule (^|/)\.(?!well-known) - [F]
+    RewriteRule (^|/)\.(?!well-known) - [F,L]
 </IfModule>
 
 # Protect the logs directory
@@ -43,10 +55,6 @@ AddDefaultCharset UTF-8
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
-
-# Add these rules to your existing .htaccess
-RewriteEngine On
-RewriteBase /
 
 # Rewrite API endpoints
 RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L]

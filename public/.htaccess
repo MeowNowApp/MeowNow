@@ -1,3 +1,15 @@
+# Prevent access to parent directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Block access to parent directories
+    RewriteCond %{REQUEST_URI} ^/\.\./ [OR]
+    RewriteCond %{REQUEST_URI} ^.*\/\.\./ [OR]
+    RewriteCond %{REQUEST_URI} ^/(src|config|vendor|logs|data)/ [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+
 # Deny access to sensitive files
 <FilesMatch "^(\.env|config\.php|composer\.(json|lock))$">
     Order allow,deny
@@ -6,18 +18,48 @@
 
 # Protect dot files and directories
 <IfModule mod_rewrite.c>
-    RewriteEngine On
     RewriteCond %{REQUEST_URI} !^/\.well-known
-    RewriteRule (^|/)\.(?!well-known) - [F]
+    RewriteRule (^|/)\.(?!well-known) - [F,L]
 </IfModule>
 
-# API rewrite rules
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # Route API requests
-    RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L]
+# Protect the logs directory
+<FilesMatch "^\.log$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Set default character set
+AddDefaultCharset UTF-8
+
+# Enable CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
 </IfModule>
+
+# Compress text files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Set caching headers for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Rewrite API endpoints
+RewriteRule ^api/v1/random/?$ api/v1/random/index.php [L]
+
+# Add this to your .htaccess file
+AddType text/css .css
 
 # Security headers
 <IfModule mod_headers.c>
@@ -30,13 +72,9 @@
 
 # Enable CORS for API
 <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, OPTIONS"
     Header set Access-Control-Allow-Headers "Content-Type"
 </IfModule>
-
-# Set default character set
-AddDefaultCharset UTF-8
 
 # Enable compression
 <IfModule mod_deflate.c>

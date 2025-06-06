@@ -37,6 +37,41 @@
   color: var(--primary-color);
 }
 
+/* Navigation Buttons */
+.nav-item a.button {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: auto;
+  position: relative;
+  overflow: visible;
+}
+
+.nav-item a.button::before {
+  display: none;
+}
+
+.nav-item a.button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  padding-right: 1rem;
+  background: var(--gradient-nav-hover);
+}
+
+.nav-item a.button.reject {
+  background: var(--gradient-primary);
+}
+
+.nav-item a.button.reject:hover {
+  background: var(--gradient-primary);
+}
+
 /* Image display container for cat images */
 .cat-image-container {
   display: flex;
@@ -176,4 +211,132 @@
     background: var(--text-secondary);
     cursor: not-allowed;
     transform: none;
+<<<<<<< Updated upstream
+=======
+    box-shadow: none;
+}
+
+.button.approve {
+    background: var(--gradient-secondary);
+    flex: 1;
+}
+
+.button.reject {
+    background: var(--gradient-primary);
+    flex: 1;
+}
+
+.button.approve:hover {
+    background: var(--gradient-secondary);
+    color: white;
+}
+
+.button.reject:hover {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+/* Image Grid */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: calc(var(--spacing-unit) * 2);
+    width: 100%;
+    margin-top: calc(var(--spacing-unit) * 2);
+}
+
+.image-card {
+    background: var(--gradient-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.image-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.image-actions {
+    padding: calc(var(--spacing-unit) * 1.5);
+}
+
+.action-form {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 1);
+    width: 100%;
+}
+
+/* Form Input Styles */
+.form-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: white;
+    transition: all var(--transition-normal);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+}
+
+label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* User Management Styles */
+.users-list {
+    margin-top: calc(var(--spacing-unit) * 4);
+    width: 100%;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: calc(var(--spacing-unit) * 2);
+}
+
+.users-table th,
+.users-table td {
+    padding: var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.users-table th {
+    background: var(--gradient-card);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.users-table tr:hover {
+    background: var(--background-hover);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.checkbox-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+>>>>>>> Stashed changes
 } 
